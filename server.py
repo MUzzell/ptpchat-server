@@ -1,4 +1,10 @@
 #!/usr/bin/python
+#
+# Experimental ptpchat-server (HTTP)
+# Very much wip
+#
+#
+#
 
 import pdb, os, datetime, sys
 from flask import Flask, make_response, render_template, request, abort
@@ -11,8 +17,12 @@ app.debug = True
 def error_500(e):
     return "oh noes!"
 
+@app.route("/msg", methods=['GET'])
+def msg_get():
+	pdp.set_trace()
+	return "{\"msg_type\": \"hello\"}"
 
-@app.route("/msg")
+@app.route("/msg", methods=['POST'])
 def msg():
     pdb.set_trace()
     content = request.json
