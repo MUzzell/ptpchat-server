@@ -16,11 +16,19 @@ UDP_PORT = 9001
 MSG_TYPE = 'msg_type'
 MSG_DATA = 'msg_data'
 
-def process_hello(sock, data):
+known_ips = []
+
+def process_hello(sock, data, addr):
     pass
 
+def process_routing(sock, data, addr):
+    pass
+    
+
+
 msg_processors = {
-'HELLO': lambda sock, x: process_hello(sock, x)
+'HELLO': lambda sock, addr, data: process_hello(sock, addr, data)
+'ROUTING': lambda sock, addr, data: process_routing(sock, addr, data)
 }
 
 def main_loop(ip, port):
@@ -28,12 +36,14 @@ def main_loop(ip, port):
     sock = socket.socket(socket.AF_INET,
                          socket.SOCK_DGRAM)
     sock.bind((ip, port))
-    
+    print "starting up"
     while True:
         data, addr = sock.recvfrom(1024)
         pdb.set_trace()
         
         process_message(sock, data, addr)
+    print "connection close"
+    conn.close()
         
 def process_message(sock, data, addr):
     try:
@@ -53,7 +63,7 @@ def process_message(sock, data, addr):
     if verb not in msg_processors:
         return 1
 
-    msg_processors[verb](sock, data)
+    msg_processors[verb](sock, addr, data)
 
     return 0
 
