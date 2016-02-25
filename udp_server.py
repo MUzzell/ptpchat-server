@@ -18,25 +18,40 @@ MSG_DATA = 'msg_data'
 
 global known_ips = []
 
-test_routing_msg = "{\"msg_type\":\"ROUTING\", \"msg_data\":{\"users\":[{\"username\":\"fred\",\"addr\":\"192.168.0.1:8080\"}]}}"
+base_routing_msg = {
+    MSG_TYPE:'ROUTING', 
+    MSG_DATA: {
+        'users': [ ]}
 
 def process_hello(sock, addr, data):
+    global known_ips
+    if data is None:
+        return
+        
+    if type(data) is not dict:
+        return
+        
+    if data['username'] is None or data['username'] is "":
+        return
+
     if addr not in known_ips:
-        known_ips += [addr]
+        known_ips += [{'username': data['username'], 'address': "%s:%d" % addr}]
     
-    return_sock = socket.socket(socket.AF_INET,
-                                socket.SOCK_DGRAM)
-    return_sock.bind(addr)
-    return_sock.sendall(test_routing_msg)
-    return_sock.close()
+    sock = socket.socket(socket.AF_INET,
+                         socket.SOCK_DGRAM)
+    sock.sendto(build_routing_msg(), addr)
+    sock.close()
 
 def process_routing(sock, addr, data):
     pass
     
-
+def build_routing_msg(addr):
+    msg = base_routing_msg
+    msg[MSG_DATA]['users'] = [{'username': x['username'], 'address':x['address']} for x in known_ips]
+    return msg
 
 msg_processors = {
-'HELLO': lambda sock, addr, data: process_hello(sock, addr, data)
+'HELLO': lambda sock, addr, data: process_hello(sock, addr, data),
 'ROUTING': lambda sock, addr, data: process_routing(sock, addr, data)
 }
 
