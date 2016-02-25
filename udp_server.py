@@ -18,10 +18,19 @@ MSG_DATA = 'msg_data'
 
 known_ips = []
 
-def process_hello(sock, data, addr):
-    pass
+test_routing_msg = "{\"msg_type\":\"ROUTING\", \"msg_data\":{\"users\":[{\"username\":\"fred\",\"addr\":\"192.168.0.1:8080\"}]}}"
 
-def process_routing(sock, data, addr):
+def process_hello(sock, addr, data):
+    if addr not in known_ips:
+        known_ips += [addr]
+    
+    return_sock = socket.socket(socket.AF_INET,
+                                socket.SOCK_DGRAM)
+    return_sock.bind(addr)
+    return_sock.sendall(test_routing_msg)
+    return_sock.close()
+
+def process_routing(sock, addr, data):
     pass
     
 
