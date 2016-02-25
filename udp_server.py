@@ -16,21 +16,22 @@ UDP_PORT = 9001
 MSG_TYPE = 'msg_type'
 MSG_DATA = 'msg_data'
 
-msg_processors = {
-'HELLO': process_hello(sock, x)
-}
-
-def process_hello(data):
+def process_hello(sock, data):
     pass
 
+msg_processors = {
+'HELLO': lambda sock, x: process_hello(sock, x)
+}
+
 def main_loop(ip, port):
+    print "in main loop"
     sock = socket.socket(socket.AF_INET,
                          socket.SOCK_DGRAM)
     sock.bind((ip, port))
     
     while True:
         data, addr = sock.recvfrom(1024)
-        pdb.settrace()
+        pdb.set_trace()
         
         process_message(sock, data, addr)
         
@@ -43,7 +44,7 @@ def process_message(sock, data, addr):
     if type(msg) is not dict:
         return 1
 
-    if MSG_TYPE not in msg || msg[MSG_TYPE] is None:
+    if MSG_TYPE not in msg or msg[MSG_TYPE] is None:
         return 1
     
     verb = msg[MSG_TYPE].upper()

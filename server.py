@@ -1,4 +1,10 @@
 #!/usr/bin/python
+#
+# Experimental ptpchat-server (HTTP)
+# Very much wip
+#
+#
+#
 
 import pdb, os, datetime, sys
 from flask import Flask, make_response, render_template, request, abort
