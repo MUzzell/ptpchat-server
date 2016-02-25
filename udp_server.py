@@ -3,7 +3,7 @@
 # Experimental ptpchat-server (UDP)
 # Very much wip
 #
-#
+# TODO: Most verbs, a timeout on known_ips, threading.
 #
 
 import pdb, os, datetime, sys
@@ -16,7 +16,7 @@ UDP_PORT = 9001
 MSG_TYPE = 'msg_type'
 MSG_DATA = 'msg_data'
 
-known_ips = []
+global known_ips = []
 
 test_routing_msg = "{\"msg_type\":\"ROUTING\", \"msg_data\":{\"users\":[{\"username\":\"fred\",\"addr\":\"192.168.0.1:8080\"}]}}"
 
