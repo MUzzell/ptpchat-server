@@ -20,8 +20,9 @@ global known_ips = []
 
 base_routing_msg = {
     MSG_TYPE:'ROUTING', 
-    MSG_DATA: {
-        'users': [ ]}
+        MSG_DATA: {
+            'users': [ ]}
+    }
 
 def process_hello(sock, addr, data):
     global known_ips
@@ -37,15 +38,13 @@ def process_hello(sock, addr, data):
     if addr not in known_ips:
         known_ips += [{'username': data['username'], 'address': "%s:%d" % addr}]
     
-    sock = socket.socket(socket.AF_INET,
-                         socket.SOCK_DGRAM)
     sock.sendto(build_routing_msg(), addr)
     sock.close()
 
 def process_routing(sock, addr, data):
     pass
     
-def build_routing_msg(addr):
+def build_routing_msg():
     msg = base_routing_msg
     msg[MSG_DATA]['users'] = [{'username': x['username'], 'address':x['address']} for x in known_ips]
     return msg
