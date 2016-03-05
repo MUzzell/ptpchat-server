@@ -43,10 +43,10 @@ def setup():
     threading.current_thread().name = "Main"
     
     listener = ListenerServer(addr, 
-        logger = LogManager(logger_name, "DEBUG"), 
+        logger = LogManager(logger_name, "ListenerServer", "DEBUG"), 
         node_manager = node_manager)
     broadcast = BroadcastServer(addr, 
-        logger = LogManager(logger_name, "DEBUG"), 
+        logger = LogManager(logger_name, "BroadcastServer", "DEBUG"), 
         node_manager = node_manager)
     
     listener_thread = threading.Thread(target=listener.serve_forever, name="Listener")
