@@ -6,10 +6,12 @@
 # TODO: Most verbs, a timeout on known_ips, threading.
 #
 
-import pdb, os, datetime, sys
+import pdb, os, datetime, sys, platform
 import socket
-import threading
+import threading, time
 import atexit
+
+import signal
 
 from listener_server import ListenerServer
 from broadcast_server import BroadcastServer
@@ -22,6 +24,8 @@ UDP_PORT = 9001
 MSG_TYPE = 'msg_type'
 MSG_DATA = 'msg_data'
 
+logger_name = "ptpchat-server"
+
 global known_ips
 known_ips = []
 
@@ -31,30 +35,49 @@ base_routing_msg = {
             'users': [ ]}
     }
 
-    
 def setup():
+    global listener, broadcast
     addr = (UDP_IP, UDP_PORT)
-    logger = LogManager("ptpchat-server", "DEBUG")
-    node_manager = NodeManager(logger)
+    node_manager = NodeManager(logger = LogManager(logger_name, "DEBUG"))
     
-    listener = ListenerServer(addr, logger = logger, node_manager = node_manager)
-    broadcast = BroadcastServer(addr, logger=logger, node_manager = node_manager)
+    threading.current_thread().name = "Main"
+    
+    listener = ListenerServer(addr, 
+        logger = LogManager(logger_name, "DEBUG"), 
+        node_manager = node_manager)
+    broadcast = BroadcastServer(addr, 
+        logger = LogManager(logger_name, "DEBUG"), 
+        node_manager = node_manager)
     
     listener_thread = threading.Thread(target=listener.serve_forever, name="Listener")
     listener_thread.daemon = True
     
-    broadcast_thread = thread.Thread(target=broadcast.main_loop, name="Broadcast")
+    broadcast_thread = threading.Thread(target=broadcast.start, name="Broadcast")
     broadcast_thread.daemon = True
     
     listener_thread.start()
     broadcast_thread.start()
+ 
+        
+def shutdown(signum, frame):
+    global listener, broadcast, exit_flag
+    threading.current_thread().name = "Main Shutdown"
     
-    print "Listener Server running in thread:", server_thread.name
+    broadcast.stop()
+    listener.shutdown()
     
+    exit_flag.set()
     
-def shutdown():
-    pass
 
 if __name__ == '__main__':
-	setup()
-    atexit.register(shutdown)
+    setup()
+    
+    signal.signal(signal.SIGINT, shutdown)
+    exit_flag = threading.Event()
+    exit_flag.clear()
+    
+    if platform.system() is 'Windows':
+        while exit_flag.is_set() is False:
+            exit_flag.wait(5)
+    else:
+        signal.pause()

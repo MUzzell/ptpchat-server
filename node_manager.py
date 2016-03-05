@@ -3,7 +3,12 @@ import threading
 
 class NodeManager():
     
-    def __init__(self, self.logger = logger):
+    def __init__(self, logger = None):
+    
+        if logger is None:
+            raise AttributeError("NodeManager Init, logger is None")
+       
+        logger.set_module_name("NodeManager")
         self.logger = logger
         self.lock = threading.Lock
         

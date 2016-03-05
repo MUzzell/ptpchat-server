@@ -1,15 +1,15 @@
 '''
 message_handler.py
-
 used by ListenerServer 
-
-
 '''
 import SocketServer, json, socket
-import handlers import *
+import handlers
 
+'''
+Have you include the verb handler in handlers.__init__.py?
+'''
 __handler_classes__ = {
-    "HELLO" = hello_handler.HelloHandler
+    "HELLO" : handlers.HelloHandler
 }
 
 class MessageHandler(SocketServer.BaseRequestHandler):

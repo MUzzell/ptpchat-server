@@ -1,4 +1,4 @@
-from logging
+import logging
 
 class LogManager():
 
@@ -11,31 +11,35 @@ class LogManager():
         "NOTSET" : 0
     }
 
-    format = "%(threadName)s - %(asctime)s - %(levelName)s - %(message)s"
+    _format = "%(asctime)s - %(levelname)s - %(modulename)s - %(message)s"
     
-    def __init__(self, log_name, log_level="INFO"):
+    def __init__(self, log_name, module_name = "ptpchat-server", log_level="INFO"):
     
         if log_name is None or log_name is '':
             raise AttributeError("LogManager, must define a log name!")
             
         if log_level not in LogManager.logging_level:
-            raise AttributeError("LogManager, must set an appropiate log level!")
+            raise AttributeError("LogManager, must set an appropriate log level!")
     
-        logging.basicConfig(format=LogManager.Format)
+        logging.basicConfig(format=LogManager._format)
         self.logger = logging.getLogger(log_name)
         self.logger.setLevel(LogManager.logging_level[log_level])
+        self.extras = {'modulename' : module_name }
+
+    def set_module_name(self, module_name):
+        self.extras['modulename'] =  module_name
         
     def critical(self, message):
-        self.logger.critical(message)
+        self.logger.critical(message, extra=self.extras)
         
     def error(self, message):
-        self.logger.error(message)
+        self.logger.error(message, extra=self.extras)
         
     def warning(self, message):
-        self.logger.warning(message)
+        self.logger.warning(message, extra=self.extras)
         
     def info(self, message):
-        self.logger.info(message)
+        self.logger.info(message, extra=self.extras)
         
     def debug(self, message):
-        self.logger.debug(message)
+        self.logger.debug(message, extra=self.extras)
