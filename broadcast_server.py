@@ -39,7 +39,7 @@ class BroadcastServer():
             if diff > 0:
                 time.sleep(diff)
         
-        #not being printed.. for some reason
+        
         self.logger.debug("BroadcastServer exit loop, closing socket")
         sock.close()
         self.run.set()

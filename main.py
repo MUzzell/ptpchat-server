@@ -57,8 +57,8 @@ def setup():
     
     listener_thread.start()
     broadcast_thread.start()
- 
-        
+
+    
 def shutdown(signum, frame):
     global listener, broadcast, exit_flag
     threading.current_thread().name = "Main Shutdown"
@@ -68,7 +68,6 @@ def shutdown(signum, frame):
     
     exit_flag.set()
     
-
 if __name__ == '__main__':
     setup()
     
@@ -78,6 +77,9 @@ if __name__ == '__main__':
     
     if platform.system() is 'Windows':
         while exit_flag.is_set() is False:
-            exit_flag.wait(5)
+            try:
+                exit_flag.wait(5)
+            except IOError:
+                pass
     else:
         signal.pause()

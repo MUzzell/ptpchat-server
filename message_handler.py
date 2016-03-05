@@ -33,7 +33,6 @@ class MessageHandler(SocketServer.BaseRequestHandler):
 
     def handle(self):
         self.handle_request(self.request[0], self.client_address, self.request[1])
-            
     
     def handle_request(self, data, addr, sock):
         try:
@@ -46,11 +45,11 @@ class MessageHandler(SocketServer.BaseRequestHandler):
             self.logger.info(MessageHandler.log_invalid_msg % "not dictionary")
             return
 
-        if MSG_TYPE not in msg or msg[MessageHandler.MSG_TYPE] is None:
+        if MessageHandler.MSG_TYPE not in msg or msg[MessageHandler.MSG_TYPE] is None:
             self.logger.info(MessageHandler.log_invalid_msg % "msg_type invalid")
         
         verb = msg[MessageHandler.MSG_TYPE].upper()
-        data = msg[MessageHandler.MSG_DATA] if MSG_DATA in msg else None
+        data = msg[MessageHandler.MSG_DATA] if MessageHandler.MSG_DATA in msg else None
         
         if data is None:
             self.logger.warning(MessageHandler.log_invalid_msg % "msg_data invalid")
@@ -61,7 +60,7 @@ class MessageHandler(SocketServer.BaseRequestHandler):
             self.logger.warning(MessageHandler.log_invalid_verb)
         
         handler = __handler_classes__[verb](self.logger, self.node_manager)
-        handler.processData(data, addr, sock)
+        handler.handleVerb(data, addr, sock)
             
         return 0
 
