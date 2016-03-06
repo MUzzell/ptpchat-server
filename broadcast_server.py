@@ -32,10 +32,10 @@ class BroadcastServer():
     
     def main_loop(self, sock):
         while self.run.is_set():
-            diff = time.clock()
+            diff = time.time()
             self.broadcast_hello()
             self.broadcast_routing()
-            diff = BroadcastServer.loop_sleep - (time.clock() - diff)
+            diff = BroadcastServer.loop_sleep - (time.time() - diff)
             if diff > 0:
                 time.sleep(diff)
         
