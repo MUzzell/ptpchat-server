@@ -53,37 +53,30 @@ class ReadMonitor():
     
     def __init__(self, lock):
         self.count = 0
-        self.internal_lock = threading.Lock()
-        self.write_event = threading.Event()
-        self.write_event.set()
-
+        
+        self.write_cond = threading.Condition()
+        
     def start_read(self):
-        #potential race condition?
-        while self.write_event.is_set() is False:
-            self.write_event.wait()
-        self.internal_lock.acquire()
-     
+    
+        self.write_cond.acquire()
         self.count += 1
-
-        self.internal_lock.release()
+        self.write_cond.release()
 
     def end_read(self):
-        self.internal_lock.acquire()
+        self.write_cond.acquire()
         self.count -= 1
-        self.internal_lock.release()
+        if self.count == 0:
+            self.notify()
+        self.write_cond.release()
 
     def start_write(self):
-        self.write_event.wait()
-            
-        while self.count > 0:
-            time.sleep(0.2 * self.count)
-        
-        self.internal_lock.acquire()
-        if self.count == 0:
-            self.write_event.clear()
-        
-        self.internal_lock.release()       
+    
+        self.write_cond.acquire()
+        while not self.count == 0:
+            self.write_cond.wait(0.5)
 
     def end_write(self):
-        self.write_event.set()
+        self.write_cond.notify()
+        self.write_cond.release()
+       
 
