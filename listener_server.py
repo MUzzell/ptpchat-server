@@ -20,6 +20,10 @@ class ListenerServer(ThreadingUDPServer):
         ThreadingUDPServer.allow_reuse_address = True
         ThreadingUDPServer.__init__(self, (host, port), MessageHandler)
         
+    def serve_forever(self):
+        self.logger.info("ListenerServer starting up")
+        ThreadingUDPServer.serve_forever(self)
+        
     def shutdown(self):
         self.logger.info("ListenerServer shutting down")
         ThreadingUDPServer.shutdown(self)
