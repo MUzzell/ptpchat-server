@@ -63,7 +63,7 @@ class BroadcastServer():
     def broadcast_hello(self):
         
         nodes = self.node_manager.get_nodes(None)
-        self.logger.info("Sending HELLO to %d nodes" % len(nodes))
+        self.logger.debug("Sending HELLO to %d nodes" % len(nodes))
         
         for node in nodes:
             

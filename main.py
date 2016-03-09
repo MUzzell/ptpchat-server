@@ -72,6 +72,7 @@ if __name__ == '__main__':
     setup('5f715c17-4a41-482a-ab1f-45fa2cdd702b')
     
     signal.signal(signal.SIGINT, shutdown)
+    signal.signal(signal.SIGTERM, shutdown)
     exit_flag = threading.Event()
     exit_flag.clear()
     

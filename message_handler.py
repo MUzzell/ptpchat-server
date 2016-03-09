@@ -36,6 +36,7 @@ class MessageHandler(SocketServer.BaseRequestHandler):
         self.handle_request(self.request[0], self.client_address, self.request[1])
     
     def handle_request(self, data, addr, sock):
+        self.logger.debug("Message handler, received packet")
         try:
             msg = json.loads(data)
         except ValueError:
@@ -59,6 +60,8 @@ class MessageHandler(SocketServer.BaseRequestHandler):
         
         if verb not in __handler_classes__:
             self.logger.warning(MessageHandler.log_invalid_verb)
+        
+        self.logger.debug("%s message recieved from %s" % (verb, "%s:%d" % addr))
         
         handler = __handler_classes__[verb](self.logger, self.node_manager)
         handler.handleVerb(data, addr, sock)
