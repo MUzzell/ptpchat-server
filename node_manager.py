@@ -24,7 +24,7 @@ class NodeManager():
         if 'client_addr' not in node:
             raise AttributeError("NodeManager, adding node without client_addr")
 
-        if self.get_nodes(node) is not None: 
+        if len(self.get_nodes(node)) > 0: 
             self.logger.info("tried to add node that is already registered")
             return node
 

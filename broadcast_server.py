@@ -60,7 +60,7 @@ class BroadcastServer():
         
         for node in nodes:
             
-            self.sock.sendto(handlers['HELLO'].buildMessage(node), node['client_addr'])
+            self.sock.sendto(self.handlers['HELLO'].buildMessage(node), node['client_addr'])
             
         
         

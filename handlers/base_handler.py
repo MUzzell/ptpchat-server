@@ -28,7 +28,7 @@ class BaseHandler():
         except ValueError:
             self.logger.debug("given uid incorrect, %s" % ValueError)
             return None
-            
+        return val  
             
     def compile_message(self, data):
         return json.dumps({BaseHandler.MSG_TYPE : self.verb, BaseHandler.MSG_DATA : data})

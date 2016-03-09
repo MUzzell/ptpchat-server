@@ -25,6 +25,7 @@ MSG_TYPE = 'msg_type'
 MSG_DATA = 'msg_data'
 
 logger_name = "ptpchat-server"
+file_name = '/etc/var/log/ptpchat-server/ptpchat-server.log'
 
 global known_ips
 known_ips = []
@@ -38,16 +39,28 @@ base_routing_msg = {
 def setup(server_uuid):
     global listener, broadcast
     addr = (UDP_IP, UDP_PORT)
-    node_manager = NodeManager(logger = LogManager(logger_name, 'node_manager', "DEBUG"))
+    node_manager = NodeManager(logger = LogManager(
+        logger_name,
+        file_name,
+        module_name='node_manager', 
+        log_level="DEBUG"))
     
     threading.current_thread().name = "Main"
     
     listener = ListenerServer(addr, server_uuid,
-        logger = LogManager(logger_name, "ListenerServer", "DEBUG"), 
+        logger = LogManager(
+            logger_name,
+            file_name,
+            module_name = "ListenerServer", 
+            log_level = "DEBUG"), 
         node_manager = node_manager)
     listener.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     broadcast = BroadcastServer(listener.socket, server_uuid,
-        logger = LogManager(logger_name, "BroadcastServer", "DEBUG"), 
+        logger = LogManager(
+            logger_name,
+            file_name,
+            module_name = "BroadcastServer", 
+            log_level = "DEBUG"), 
         node_manager = node_manager)
     
     listener_thread = threading.Thread(target=listener.serve_forever, name="Listener")

@@ -55,6 +55,7 @@ class MessageHandler(SocketServer.BaseRequestHandler):
         
         if data is None:
             self.logger.warning(MessageHandler.log_invalid_msg % "msg_data invalid")
+            return
         
         global __handler_classes__
         
