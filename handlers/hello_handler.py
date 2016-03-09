@@ -31,10 +31,10 @@ class HelloHandler(BaseHandler):
 
         node = self.node_manager.get_nodes({'node_id': node_id})
     
-        if node is None:
+        if node is None or len(node) == 0 :
             self.node_manager.add_node({'node_id' : node_id, 'client_addr' : addr, 'last_seen' : time.time() })
         else:
-            node['last_seen'] = time.time()
+            node[0]['last_seen'] = time.time()
             self.node_manager.update_node(node)
             
     def buildMessage(self, data):

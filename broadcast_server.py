@@ -20,7 +20,7 @@ class BroadcastServer():
         if host is None or port is None:
             raise AttributeError("BroadcastServer Init, addr is not valid")
             
-        self.sock = socket
+        self.sock = sock
         self.server_uuid = server_uuid
         global __handler_classes__
         
@@ -36,7 +36,7 @@ class BroadcastServer():
         
     def start(self):
         self.logger.info("BroadcastServer starting up")
-        self.main_loop(sock)
+        self.main_loop(self.sock)
     
     def main_loop(self, sock):
         while self.run.is_set():

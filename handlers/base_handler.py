@@ -26,6 +26,7 @@ class BaseHandler():
         try:
             val = UUID(uid, version=4)
         except ValueError:
+            self.logger.debug("given uid incorrect, %s" % ValueError)
             return None
             
         if val.hex == uid:
