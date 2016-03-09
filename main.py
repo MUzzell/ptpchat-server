@@ -25,7 +25,7 @@ MSG_TYPE = 'msg_type'
 MSG_DATA = 'msg_data'
 
 logger_name = "ptpchat-server"
-file_name = '/etc/var/log/ptpchat-server/ptpchat-server.log'
+file_name = '/var/log/ptpchat-server/ptpchat-server.log'
 
 global known_ips
 known_ips = []
