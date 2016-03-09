@@ -61,7 +61,7 @@ class MessageHandler(SocketServer.BaseRequestHandler):
         if verb not in __handler_classes__:
             self.logger.warning(MessageHandler.log_invalid_verb)
         
-        self.logger.debug("%s message recieved from %s" % (verb, "%s:%d" % addr))
+        self.logger.debug("%s message received from %s" % (verb, "%s:%d" % addr))
         
         handler = __handler_classes__[verb](self.logger, self.node_manager)
         handler.handleVerb(data, addr, sock)
