@@ -35,17 +35,17 @@ base_routing_msg = {
             'users': [ ]}
     }
 
-def setup():
+def setup(server_uuid):
     global listener, broadcast
     addr = (UDP_IP, UDP_PORT)
-    node_manager = NodeManager(logger = LogManager(logger_name, "DEBUG"))
+    node_manager = NodeManager(logger = LogManager(logger_name, 'node_manager', "DEBUG"))
     
     threading.current_thread().name = "Main"
     
-    listener = ListenerServer(addr, 
+    listener = ListenerServer(addr, server_uuid,
         logger = LogManager(logger_name, "ListenerServer", "DEBUG"), 
         node_manager = node_manager)
-    broadcast = BroadcastServer(addr, 
+    broadcast = BroadcastServer(addr, server_uuid,
         logger = LogManager(logger_name, "BroadcastServer", "DEBUG"), 
         node_manager = node_manager)
     
@@ -69,7 +69,7 @@ def shutdown(signum, frame):
     exit_flag.set()
     
 if __name__ == '__main__':
-    setup()
+    setup('5f715c17-4a41-482a-ab1f-45fa2cdd702b')
     
     signal.signal(signal.SIGINT, shutdown)
     exit_flag = threading.Event()

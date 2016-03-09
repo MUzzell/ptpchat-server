@@ -30,6 +30,7 @@ class MessageHandler(SocketServer.BaseRequestHandler):
     def setup(self):
         self.logger = self.server.logger
         self.node_manager = self.server.node_manager
+        self.server_uuid = self.server.server_uuid
 
     def handle(self):
         self.handle_request(self.request[0], self.client_address, self.request[1])

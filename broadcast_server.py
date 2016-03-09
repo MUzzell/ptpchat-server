@@ -1,12 +1,18 @@
 
 import socket, pdb, json, time
 import threading
+import handlers
+
+#don't like this being here.. :(
+__handler_classes__ = {
+    "HELLO" : handlers.HelloHandler
+}
 
 class BroadcastServer():
 
     loop_sleep = 2
     
-    def __init__(self, (host, port), logger = None, node_manager = None):
+    def __init__(self, (host, port), server_uuid, logger = None, node_manager = None):
         
         if logger is None or node_manager is None:
             raise AttributeError("BroadcastServer Init, logger or node_manager is None")
@@ -16,10 +22,16 @@ class BroadcastServer():
             
         self.host = host
         self.port = port
+        self.server_uuid = server_uuid
+        global __handler_classes__
+        
+        self.handlers = __handler_classes__
+        
+        for handler in self.handlers:
+            self.handlers[handler] = self.handlers[handler](server_uuid, logger, node_manager)
         
         self.run = threading.Event()
         self.run.set()
-        logger.set_module_name("BroadcastServer")
         self.logger = logger
         self.node_manager = node_manager
         
@@ -39,7 +51,6 @@ class BroadcastServer():
             if diff > 0:
                 time.sleep(diff)
         
-        
         self.logger.debug("BroadcastServer exit loop, closing socket")
         sock.close()
         self.run.set()
@@ -50,7 +61,15 @@ class BroadcastServer():
         self.run.wait(3)    
             
     def broadcast_hello(self):
-        pass
+        
+        nodes = self.node_manager.get_nodes(None)
+        self.logger.info("Sending HELLO to %d nodes" % len(nodes))
+        
+        for node in nodes:
+            
+            self.sock.sendto(handlers['HELLO'].buildMessage(node), node['client_addr'])
+            
+        
         
     def broadcast_routing(self):
         pass

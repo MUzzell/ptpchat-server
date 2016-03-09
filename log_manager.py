@@ -26,9 +26,6 @@ class LogManager():
         self.logger.setLevel(LogManager.logging_level[log_level])
         self.extras = {'modulename' : module_name }
 
-    def set_module_name(self, module_name):
-        self.extras['modulename'] =  module_name
-        
     def critical(self, message):
         self.logger.critical(message, extra=self.extras)
         
