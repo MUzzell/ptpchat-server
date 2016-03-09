@@ -16,11 +16,8 @@ class BroadcastServer():
         
         if logger is None or node_manager is None:
             raise AttributeError("BroadcastServer Init, logger or node_manager is None")
-            
-        if host is None or port is None:
-            raise AttributeError("BroadcastServer Init, addr is not valid")
-            
-        self.sock = sock
+          
+        self.sock = socket
         self.server_uuid = server_uuid
         global __handler_classes__
         

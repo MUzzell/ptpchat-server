@@ -29,10 +29,6 @@ class BaseHandler():
             self.logger.debug("given uid incorrect, %s" % ValueError)
             return None
             
-        if val.hex == uid:
-            return val
-        else:
-            return None
             
     def compile_message(self, data):
         return json.dumps({BaseHandler.MSG_TYPE : self.verb, BaseHandler.MSG_DATA : data})
