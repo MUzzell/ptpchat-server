@@ -45,7 +45,8 @@ def setup(server_uuid):
     listener = ListenerServer(addr, server_uuid,
         logger = LogManager(logger_name, "ListenerServer", "DEBUG"), 
         node_manager = node_manager)
-    broadcast = BroadcastServer(addr, server_uuid,
+    listener.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    broadcast = BroadcastServer(listener.socket, server_uuid,
         logger = LogManager(logger_name, "BroadcastServer", "DEBUG"), 
         node_manager = node_manager)
     

@@ -63,7 +63,7 @@ class MessageHandler(SocketServer.BaseRequestHandler):
         
         self.logger.debug("%s message received from %s" % (verb, "%s:%d" % addr))
         
-        handler = __handler_classes__[verb](self.logger, self.node_manager)
+        handler = __handler_classes__[verb](self.server_uuid, self.logger, self.node_manager)
         handler.handleVerb(data, addr, sock)
             
         return 0
