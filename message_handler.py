@@ -53,7 +53,7 @@ class MessageHandler(SocketServer.BaseRequestHandler):
         verb = msg[MessageHandler.MSG_TYPE].upper()
         data = msg[MessageHandler.MSG_DATA] if MessageHandler.MSG_DATA in msg else None
         
-        if data is None:
+        if data is None or type(data) is not dict:
             self.logger.warning(MessageHandler.log_invalid_msg % "msg_data invalid")
             return
         

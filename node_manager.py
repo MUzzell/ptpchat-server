@@ -2,6 +2,9 @@
 import threading
 
 class NodeManager():
+
+    log_deleted_node = "NodeManager, deleted node: %s"
+    log_add_node_already_exists = "NodeManager, tried to add node that already exists: %s" 
     
     def __init__(self, logger = None):
     
@@ -25,7 +28,7 @@ class NodeManager():
             raise AttributeError("NodeManager, adding node without client_addr")
 
         if len(self.get_nodes(node)) > 0: 
-            self.logger.info("tried to add node that is already registered")
+            self.logger.info(NodeManager.log_add_node_already_exists % node['node_id'])
             return node
 
         node_id = node['node_id']
@@ -53,7 +56,21 @@ class NodeManager():
         
         
     def drop_node(self, node):
-        pass
+        if 'node_id' not in node:
+            raise AttributeError("NodeManager, dropping node without node_id")
+        
+        node_id = node['node_id']
+        
+        self.monitor.start_read()
+        if node_id not in self.nodes:
+            self.monitor.end_read()
+            raise AttributeError("NodeManager, node_id not found!")
+        
+        self.monitor.end_read()
+        self.monitor.start_write()
+        del self.nodes[node_id]
+        self.monitor.end_write()
+        self.logger.info(NodeManager.log_deleted_node % node_id)
     
     def get_channels(self):
         pass
@@ -68,10 +85,17 @@ class NodeManager():
         self.monitor.end_read()
         return nodes
 
+    #MUST have read lock!!!
     def __matches(self, node, filter):
+        return_node = None
         if 'node_id' in filter:
-            node = node if filter['node_id'] == node else None
-        return node is not None
+            return_node = node if filter['node_id'] == node else None
+        node = self.nodes[node]
+        if 'last_seen_lt' in filter:
+            return_node = node if filter['last_seen_lt'] > node['last_seen'] else None
+        if 'last_seen_gt' in filter:
+            return_node = node if filter['last_seen_gt'] < node['last_seen'] else None
+        return return_node is not None
          
 class ReadMonitor():
     

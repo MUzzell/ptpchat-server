@@ -60,7 +60,7 @@ def setup(server_uuid):
             logger_name,
             file_name,
             module_name = "BroadcastServer", 
-            log_level = "DEBUG"), 
+            log_level = "INFO"), 
         node_manager = node_manager)
     
     listener_thread = threading.Thread(target=listener.serve_forever, name="Listener")
