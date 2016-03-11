@@ -35,8 +35,6 @@ class BroadcastServer():
             self.handlers[handler] = self.handlers[handler](server_uuid, logger, node_manager)
             
             
-        self.process_nodes_scheduler = sched.scheduler(time.time, time.sleep)
-        self.process_nodes_scheduler.enter(process_nodes_interval, 1, self.process_nodes, ())
         self.run = threading.Event()
         self.run.set()
         self.logger = logger
@@ -52,6 +50,7 @@ class BroadcastServer():
             diff = time.time()
             self.broadcast_hello()
             self.broadcast_routing()
+            self.process_nodes()
             diff = BroadcastServer.loop_sleep - (time.time() - diff)
             if diff > 0:
                 time.sleep(diff)
@@ -70,8 +69,6 @@ class BroadcastServer():
         if nodes is not None and len(nodes) > 0:
             for node in nodes:
                 self.node_manager.drop_node(node)
-            
-        self.process_nodes_scheduler.run()
             
     def broadcast_hello(self):
         
