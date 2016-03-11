@@ -38,7 +38,7 @@ process_nodes_interval : 30
 
     def __init__(self, config_file=None):
         self.config = ConfigParser.RawConfigParser()
-        pdb.set_trace()
+        
         if config_file is not None and os.path.exists(config_file):
             self.config.read(config_file)
         else:
