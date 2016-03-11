@@ -10,57 +10,46 @@ import pdb, os, datetime, sys, platform
 import socket
 import threading, time
 import atexit
+import argparse
 
 import signal
 
+from config_manager import ConfigManager
 from listener_server import ListenerServer
 from broadcast_server import BroadcastServer
 from node_manager import NodeManager
 from log_manager import LogManager
 
-UDP_IP = "0.0.0.0"
-UDP_PORT = 9001
-
-MSG_TYPE = 'msg_type'
-MSG_DATA = 'msg_data'
-
 logger_name = "ptpchat-server"
-file_name = '/var/log/ptpchat-server/ptpchat-server.log'
+#file_name = '/var/log/ptpchat-server/ptpchat-server.log'
 
-global known_ips
-known_ips = []
-
-base_routing_msg = {
-    MSG_TYPE:'ROUTING', 
-        MSG_DATA: {
-            'users': [ ]}
-    }
-
-def setup(server_uuid):
+def setup(args, config):
     global listener, broadcast
-    addr = (UDP_IP, UDP_PORT)
+    addr = (config.main.listen_host, config.main.listen_port)
+    server_uuid = config.main.server_uuid
+    pdb.set_trace()
     node_manager = NodeManager(logger = LogManager(
         logger_name,
-        file_name,
+        file_name = config.main.log_file if args.log_to_file else None,
         module_name='node_manager', 
-        log_level="DEBUG"))
+        log_level=config.main.node_log_level if args.log_level is None else args.log_level))
     
     threading.current_thread().name = "Main"
     
     listener = ListenerServer(addr, server_uuid,
         logger = LogManager(
             logger_name,
-            file_name,
+            file_name = config.main.log_file if args.log_to_file else None,
             module_name = "ListenerServer", 
-            log_level = "DEBUG"), 
+            log_level = config.listener.log_level if args.log_level is None else args.log_level), 
         node_manager = node_manager)
     listener.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     broadcast = BroadcastServer(listener.socket, server_uuid,
         logger = LogManager(
             logger_name,
-            file_name,
+            file_name = config.main.log_file if args.log_to_file else None,
             module_name = "BroadcastServer", 
-            log_level = "INFO"), 
+            log_level = config.broadcast.log_level if args.log_level is None else args.log_level), 
         node_manager = node_manager)
     
     listener_thread = threading.Thread(target=listener.serve_forever, name="Listener")
@@ -82,8 +71,17 @@ def shutdown(signum, frame):
     
     exit_flag.set()
     
+def process_args(args):
+    parser = argparse.ArgumentParser(description="ptpchat-server, main function. These arguments supersede any config file arguments")
+    parser.add_argument('--log', dest='log_level', default=None, help="set a global log level")
+    parser.add_argument('--no-log', dest='log_to_file', action='store_false', help="disable file logging")
+    return parser.parse_args(args)
+    
 if __name__ == '__main__':
-    setup('5f715c17-4a41-482a-ab1f-45fa2cdd702b')
+
+    args = process_args(sys.argv[1:])
+    config = ConfigManager('/etc/ptpchat-server/server.cfg')
+    setup(args, config)
     
     signal.signal(signal.SIGINT, shutdown)
     signal.signal(signal.SIGTERM, shutdown)

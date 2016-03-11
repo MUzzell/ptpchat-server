@@ -22,6 +22,7 @@ class ListenerServer(ThreadingUDPServer):
         
     def serve_forever(self):
         self.logger.info("ListenerServer starting up")
+        self.logger.debug("Listening on: %s:%d" % self.server_address)
         ThreadingUDPServer.serve_forever(self)
         
     def shutdown(self):

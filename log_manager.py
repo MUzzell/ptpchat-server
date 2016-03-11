@@ -1,4 +1,4 @@
-import logging
+import logging, pdb
 
 class LogManager():
 
@@ -13,8 +13,7 @@ class LogManager():
 
     _format = "%(asctime)s - %(levelname)s - %(modulename)s - %(message)s"
     
-    def __init__(self, log_name, file_name, module_name = "ptpchat-server", log_level="INFO"):
-    
+    def __init__(self, log_name, file_name = None, module_name = "ptpchat-server", log_level="INFO"):
         if log_name is None or log_name is '':
             raise AttributeError("LogManager, must define a log name!")
             

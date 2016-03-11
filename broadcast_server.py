@@ -16,6 +16,7 @@ class BroadcastServer():
     log_stop_server = "BroadcastServer shutting down"
     
     node_cutoff = 15
+    process_nodes_interval = 30
     
     def __init__(self, socket, server_uuid, logger = None, node_manager = None):
         
@@ -65,6 +66,7 @@ class BroadcastServer():
         self.run.wait(3)    
         
     def process_nodes(self):
+        self.logger.debug("pruning node list")
         nodes = self.node_manager.get_nodes({'last_seen_lt' : time.time() - BroadcastServer.node_cutoff})
         
         if nodes is None or len(nodes) == 0:
