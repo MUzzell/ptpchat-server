@@ -57,8 +57,6 @@ class BroadcastServer():
             if diff > 0:
                 time.sleep(diff)
         
-        self.logger.debug("BroadcastServer exit loop, closing socket")
-        sock.close()
         self.run.set()
                 
     def stop(self):
@@ -76,6 +74,8 @@ class BroadcastServer():
         for node in nodes:
             self.node_manager.drop_node(node)
             
+        self.process_nodes_timer.start()
+            
     def broadcast_hello(self):
         
         nodes = self.node_manager.get_nodes(None)
@@ -85,4 +85,7 @@ class BroadcastServer():
             self.sock.sendto(self.handlers['HELLO'].buildMessage(node), node['client_addr'])
         
     def broadcast_routing(self):
-        pass
+        nodes = self.node_manager.get_nodes(None)
+        self.logger.debug("Sending ROUTING to %d nodes" % len(nodes))
+        for node in nodes:
+            self.sock.sendto(self.handlers['ROUTING'].buildMessage(node), node['client_addr'])
