@@ -2,6 +2,7 @@
 import socket, pdb, json, time
 import threading
 import handlers
+import sched
 
 #don't like this being here.. :(
 __handler_classes__ = {
@@ -34,10 +35,8 @@ class BroadcastServer():
             self.handlers[handler] = self.handlers[handler](server_uuid, logger, node_manager)
             
             
-        self.process_nodes_timer = threading.Timer(
-            BroadcastServer.process_nodes_interval, 
-            self.process_nodes)
-            
+        self.process_nodes_scheduler = sched.scheduler(time.time, time.sleep)
+        self.process_nodes_scheduler.enter(process_nodes_interval, 1, self.process_nodes, ())
         self.run = threading.Event()
         self.run.set()
         self.logger = logger
@@ -45,7 +44,7 @@ class BroadcastServer():
         
     def start(self):
         self.logger.info(BroadcastServer.log_start_server)
-        self.process_nodes_timer.start()
+        self.process_nodes_scheduler.run()
         self.main_loop(self.sock)
     
     def main_loop(self, sock):
@@ -68,13 +67,11 @@ class BroadcastServer():
         self.logger.debug("pruning node list")
         nodes = self.node_manager.get_nodes({'last_seen_lt' : time.time() - BroadcastServer.node_cutoff})
         
-        if nodes is None or len(nodes) == 0:
-            return
+        if nodes is not None and len(nodes) > 0:
+            for node in nodes:
+                self.node_manager.drop_node(node)
             
-        for node in nodes:
-            self.node_manager.drop_node(node)
-            
-        self.process_nodes_timer.start()
+        self.process_nodes_scheduler.run()
             
     def broadcast_hello(self):
         
