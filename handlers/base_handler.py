@@ -9,6 +9,8 @@ class BaseHandler():
     MSG_DATA = 'msg_data'
     
     NODE_ID = 'node_id'
+    CLIENT_ADDR = 'client_addr'
+    LAST_SEEN = 'last_seen'
     
     def __init__(self, uuid, logger= None, node_manager= None, extras = None):
         self.verb = None

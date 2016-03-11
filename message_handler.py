@@ -9,7 +9,8 @@ import handlers
 Have you include the verb handler in handlers.__init__.py?
 '''
 __handler_classes__ = {
-    "HELLO" : handlers.HelloHandler
+    "HELLO" : handlers.HelloHandler,
+    "ROUTING" : handlers.RoutingHandler
 }
 
 class MessageHandler(SocketServer.BaseRequestHandler):

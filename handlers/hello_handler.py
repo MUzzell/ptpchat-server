@@ -43,7 +43,7 @@ class HelloHandler(BaseHandler):
     
         if node is None or len(node) == 0 :
             self.logger.info(HelloHandler.log_adding_node % node_id)
-            self.node_manager.add_node({'node_id' : node_id, 'client_addr' : addr, 'last_seen' : time.time() })
+            self.node_manager.add_node({BaseHandler.NODE_ID : node_id, BaseHandler.CLIENT_ADDR : addr, BaseHandler.LAST_SEEN : time.time() })
         else:
             self.logger.info(HelloHandler.log_updating_node % node_id)
             node = node[0]

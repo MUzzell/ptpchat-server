@@ -27,7 +27,7 @@ def setup(args, config):
     global listener, broadcast
     addr = (config.main.listen_host, config.main.listen_port)
     server_uuid = config.main.server_uuid
-    pdb.set_trace()
+    
     node_manager = NodeManager(logger = LogManager(
         logger_name,
         file_name = config.main.log_file if args.log_to_file else None,
@@ -43,7 +43,9 @@ def setup(args, config):
             module_name = "ListenerServer", 
             log_level = config.listener.log_level if args.log_level is None else args.log_level), 
         node_manager = node_manager)
+        
     listener.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    
     broadcast = BroadcastServer(listener.socket, server_uuid,
         logger = LogManager(
             logger_name,

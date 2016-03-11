@@ -5,7 +5,8 @@ import handlers
 
 #don't like this being here.. :(
 __handler_classes__ = {
-    "HELLO" : handlers.HelloHandler
+    "HELLO" : handlers.HelloHandler,
+    "ROUTING" : handlers.RoutingHandler
 }
 
 class BroadcastServer():
