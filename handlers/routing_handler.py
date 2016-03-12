@@ -21,6 +21,6 @@ class RoutingHandler(BaseHandler):
         nodes = [{BaseHandler.NODE_ID : "%s" % x[BaseHandler.NODE_ID], RoutingHandler.ADDRESS : "%s:%d" % x[BaseHandler.CLIENT_ADDR]} for x in self.node_manager.get_nodes(None)]
         
         return self.compile_message({ 
-            BaseHandler.NODE_ID : self.server_uuid,
+            BaseHandler.NODE_ID : "%s" % self.server_uuid,
             RoutingHandler.NODES : nodes})
             

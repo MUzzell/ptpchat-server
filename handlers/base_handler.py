@@ -31,6 +31,11 @@ class BaseHandler():
             self.logger.debug("given uid incorrect, %s" % ValueError)
             return None
         return val  
+        
+    def send_message(self, msg, addr, sock):
+        self.logger.debug("%s, Sending message to %s:%d" % self.verb, addr[0], addr[1])
+        
+        sock.sendto(msg, addr)
             
     def compile_message(self, data):
         return json.dumps({BaseHandler.MSG_TYPE : self.verb, BaseHandler.MSG_DATA : data})

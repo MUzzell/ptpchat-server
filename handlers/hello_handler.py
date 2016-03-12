@@ -29,7 +29,7 @@ class HelloHandler(BaseHandler):
             self.logger.warning(HelloHandler.log_no_node_id)
             return 
             
-        node_id = self.parse_uuid(data["node_id"])
+        node_id = self.parse_uuid(data[BaseHandler.NODE_ID])
         
         if node_id is None:
             self.logger.warning(HelloHandler.log_node_id_invalid)
@@ -39,7 +39,7 @@ class HelloHandler(BaseHandler):
             self.logger.warning(HelloHandler.log_node_id_same_as_server)
             return
             
-        node = self.node_manager.get_nodes({'node_id': node_id})
+        node = self.node_manager.get_nodes({BaseHandler.NODE_ID: node_id})
     
         if node is None or len(node) == 0 :
             self.logger.info(HelloHandler.log_adding_node % node_id)
@@ -53,7 +53,7 @@ class HelloHandler(BaseHandler):
     def buildMessage(self, data):
         
         return self.compile_message({ 
-            BaseHandler.NODE_ID : self.server_uuid,
+            BaseHandler.NODE_ID : "%s" % self.server_uuid,
             HelloHandler.VERSION : self.version })
             
 

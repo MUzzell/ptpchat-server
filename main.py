@@ -11,6 +11,7 @@ import socket
 import threading, time
 import atexit
 import argparse
+import uuid
 
 import signal
 
@@ -26,7 +27,13 @@ logger_name = "ptpchat-server"
 def setup(args, config):
     global listener, broadcast
     addr = (config.main.listen_host, config.main.listen_port)
-    server_uuid = config.main.server_uuid
+    
+    try:
+        server_uuid = uuid.UUID(config.main.server_uuid, version=4)
+    except ValueError:
+        self.logger.critical("given server uuid is invalid, quitting (%s)" % ValueError)
+        return
+    
     
     node_manager = NodeManager(logger = LogManager(
         logger_name,
