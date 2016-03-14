@@ -5,6 +5,7 @@
 '   TODO: accepting CONNECTS to this server.
 '   TODO: what if we cant find / talk to B?
 '   TODO: you could probably DDoS with this, how to prevent / mitigate?
+'   #TODO: verify packets came from the correct hosts
 '''
 
 from base_handler import BaseHandler
@@ -76,9 +77,6 @@ class ConnectHandler(BaseHandler):
         src_match = src_match.groups()
         dst_match = dst_match.groups()
         
-        dst = None
-        src = None
-       
         if src_match == (None, None) or dst_match == (None, None):
             self.logger.warning(ConnectHandler.log_invalid_data)
             return
@@ -104,7 +102,7 @@ class ConnectHandler(BaseHandler):
                 ConnectHandler.SRC_NODE_ID : "%s" % src_node_id,
                 ConnectHandler.DST_NODE_ID : "%s" % dst_node_id,
                 ConnectHandler.SRC : "%s:%s" % (src_node[BaseHandler.CLIENT_ADDR][0], src_match[1]),
-                ConnectHandler.DST : dst }))
+                ConnectHandler.DST : dst }), dst_node[BaseHandler.CLIENT_ADDR], sock)
            
         #type 2: dst contains full socket, src contains full socket. Forward to src node.
         if  ((dst_match[0] is not None and dst_match[1] is not None) and
@@ -113,7 +111,7 @@ class ConnectHandler(BaseHandler):
                 ConnectHandler.SRC_NODE_ID : "%s" % src_node_id,
                 ConnectHandler.DST_NODE_ID : "%s" % dst_node_id,
                 ConnectHandler.SRC : src,
-                ConnectHandler.DST : dst }))
+                ConnectHandler.DST : dst }), src_node[BaseHandler.CLIENT_ADDR], sock)
             
         # if one of the other CONNECT messages, ignore
         return

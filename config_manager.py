@@ -43,10 +43,7 @@ process_nodes_interval : 30
             self.config.read(config_file)
         else:
             self.config.readfp(ConfigManager.defaults)
-            
-        
-        
-        
+          
         self.listener = ConfigObject()
         self.broadcast = ConfigObject()
         self.main = ConfigObject()

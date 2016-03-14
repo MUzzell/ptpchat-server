@@ -29,7 +29,7 @@ def setup(args, config):
     addr = (config.main.listen_host, config.main.listen_port)
     
     try:
-        server_uuid = uuid.UUID(config.main.server_uuid, version=4)
+        config.main.server_uuid = uuid.UUID(config.main.server_uuid, version=4)
     except ValueError:
         self.logger.critical("given server uuid is invalid, quitting (%s)" % ValueError)
         return
@@ -43,7 +43,7 @@ def setup(args, config):
     
     threading.current_thread().name = "Main"
     
-    listener = ListenerServer(addr, server_uuid,
+    listener = ListenerServer(config,
         logger = LogManager(
             logger_name,
             file_name = config.main.log_file if args.log_to_file else None,
@@ -53,7 +53,7 @@ def setup(args, config):
         
     listener.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     
-    broadcast = BroadcastServer(listener.socket, server_uuid,
+    broadcast = BroadcastServer(listener.socket, config,
         logger = LogManager(
             logger_name,
             file_name = config.main.log_file if args.log_to_file else None,

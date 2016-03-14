@@ -17,7 +17,7 @@ class NodeManager():
         self.nodes = {}
         
     '''
-    Nodes are identifies by their 'node_id' and NOT their 
+    Nodes are identified by their 'node_id' and NOT their 
     ssl material.
     If we are adding a node that has been seen bofore, update
     '''

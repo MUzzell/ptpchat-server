@@ -7,33 +7,33 @@ import sched
 #don't like this being here.. :(
 __handler_classes__ = {
     "HELLO" : handlers.HelloHandler,
-    "ROUTING" : handlers.RoutingHandler
+    "ROUTING" : handlers.RoutingHandler,
+    "CONNECT" : handlers.ConnectHandler
 }
 
 class BroadcastServer():
 
-    loop_sleep = 3
     
     log_start_server = "BroadcastServer starting up"
     log_stop_server = "BroadcastServer shutting down"
     
-    node_cutoff = 15
-    process_nodes_interval = 30
-    
-    def __init__(self, socket, server_uuid, logger = None, node_manager = None):
+    def __init__(self, socket, config, logger = None, node_manager = None):
         
-        if logger is None or node_manager is None:
-            raise AttributeError("BroadcastServer Init, logger or node_manager is None")
+        if logger is None or node_manager is None or config is None:
+            raise AttributeError("BroadcastServer Init, logger, config or node_manager is None")
           
         self.sock = socket
-        self.server_uuid = server_uuid
+        self.server_uuid = config.main.server_uuid
+        
+        self.node_cutoff = config.broadcast.node_cutoff
+        self.loop_sleep = config.broadcast.loop_sleep
+        
         global __handler_classes__
         
         self.handlers = __handler_classes__
         
         for handler in self.handlers:
-            self.handlers[handler] = self.handlers[handler](server_uuid, logger, node_manager)
-            
+            self.handlers[handler] = self.handlers[handler](self.server_uuid, logger, node_manager)
             
         self.run = threading.Event()
         self.run.set()
@@ -42,7 +42,6 @@ class BroadcastServer():
         
     def start(self):
         self.logger.info(BroadcastServer.log_start_server)
-        self.process_nodes_scheduler.run()
         self.main_loop(self.sock)
     
     def main_loop(self, sock):
@@ -51,7 +50,7 @@ class BroadcastServer():
             self.broadcast_hello()
             self.broadcast_routing()
             self.process_nodes()
-            diff = BroadcastServer.loop_sleep - (time.time() - diff)
+            diff = self.loop_sleep - (time.time() - diff)
             if diff > 0:
                 time.sleep(diff)
         
@@ -64,7 +63,7 @@ class BroadcastServer():
         
     def process_nodes(self):
         self.logger.debug("pruning node list")
-        nodes = self.node_manager.get_nodes({'last_seen_lt' : time.time() - BroadcastServer.node_cutoff})
+        nodes = self.node_manager.get_nodes({'last_seen_lt' : time.time() - self.node_cutoff})
         
         if nodes is not None and len(nodes) > 0:
             for node in nodes:
