@@ -4,11 +4,12 @@ from uuid import UUID
 import json
 
 class BaseHandler():
-    
+
     MSG_TYPE = 'msg_type'
     MSG_DATA = 'msg_data'
     
     NODE_ID = 'node_id'
+    MSG_ID = 'msg_id'
     CLIENT_ADDR = 'client_addr'
     LAST_SEEN = 'last_seen'
     
@@ -22,11 +23,11 @@ class BaseHandler():
         self.server_uuid = uuid
         self.logger= logger
         self.node_manager= node_manager
-        
+            
     def handleVerb(self, data, addr, sock):
         self.logger.error("BaseHandler.handleVerb called!")
         
-    def buildMessage(self, data):
+    def buildMessage(self, data, ttl=None, flood=None):
         self.logger.error("BaseHandler.buildVerb called!")
         
     def parse_uuid(self, uid):

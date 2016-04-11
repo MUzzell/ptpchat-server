@@ -29,17 +29,17 @@ class HelloHandler(BaseHandler):
         
         if "node_id" not in data:
             self.logger.warning(HelloHandler.log_no_node_id)
-            return 
+            return False
             
         node_id = self.parse_uuid(data[BaseHandler.NODE_ID])
         
         if node_id is None:
             self.logger.warning(HelloHandler.log_node_id_invalid)
-            return 
+            return False
             
         if node_id == self.server_uuid:
             self.logger.warning(HelloHandler.log_node_id_same_as_server)
-            return
+            return False
             
         node = self.node_manager.get_nodes({BaseHandler.NODE_ID: node_id})
     
@@ -52,11 +52,13 @@ class HelloHandler(BaseHandler):
             node['last_seen'] = time.time()
             self.node_manager.update_node(node)
             
-    def buildMessage(self, data):
+        return True
+            
+    def buildMessage(self, data, ttl=None, flood=None):
         
         return self.compile_message({ 
             BaseHandler.NODE_ID : "%s" % self.server_uuid,
-            HelloHandler.VERSION : self.version })
+            HelloHandler.VERSION : self.version }, ttl, flood)
             
 
         

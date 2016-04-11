@@ -90,6 +90,8 @@ class NodeManager():
         return_node = None
         if 'node_id' in filter:
             return_node = node if filter['node_id'] == node else None
+        if 'excluding_node_id' in filter:
+            return_node = node if filter['node_id'] != node else None
         node = self.nodes[node]
         if 'last_seen_lt' in filter:
             return_node = node if filter['last_seen_lt'] > node['last_seen'] else None
