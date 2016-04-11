@@ -35,7 +35,10 @@ class MessageHandler(SocketServer.BaseRequestHandler):
         self.server_uuid = self.server.server_uuid
 
     def handle(self):
-        self.handle_request(self.request[0], self.client_address, self.request[1])
+        try:
+            self.handle_request(self.request[0], self.client_address, self.request[1])
+        except Exception e:
+            self.logger.error("Unhandled error in request: %s" % e.message)
     
     def handle_request(self, data, addr, sock):
         self.logger.debug("Message handler, received packet")

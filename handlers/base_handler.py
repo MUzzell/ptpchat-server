@@ -12,8 +12,13 @@ class BaseHandler():
     CLIENT_ADDR = 'client_addr'
     LAST_SEEN = 'last_seen'
     
+    TTL = 'ttl'
+    FLOOD = 'flood'
+    
     def __init__(self, uuid, logger= None, node_manager= None, extras = None):
         self.verb = None
+        self.ttl = 1
+        self.flood = False
         self.server_uuid = uuid
         self.logger= logger
         self.node_manager= node_manager
@@ -37,5 +42,9 @@ class BaseHandler():
         
         sock.sendto(msg, addr)
             
-    def compile_message(self, data):
-        return json.dumps({BaseHandler.MSG_TYPE : self.verb, BaseHandler.MSG_DATA : data})
+    def compile_message(self, data, ttl=self.ttl, flood=self.flood):
+        return json.dumps({
+            BaseHandler.TTL : ttl,
+            BaseHandler.FLOOD : flood,
+            BaseHandler.MSG_TYPE : self.verb, 
+            BaseHandler.MSG_DATA : data})

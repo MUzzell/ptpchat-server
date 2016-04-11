@@ -17,6 +17,8 @@ class HelloHandler(BaseHandler):
     def __init__(self, uuid, logger= None, node_manager= None, extras = None):
         BaseHandler.__init__(self, uuid, logger, node_manager)
         self.verb = 'HELLO'
+        self.ttl = 1
+        self.flood = False
         
         if extras is not None and HelloHandler.VERSION in extras:
             self.version = extras[HelloHandler.VERSION]

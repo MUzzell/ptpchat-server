@@ -12,6 +12,8 @@ class RoutingHandler(BaseHandler):
     def __init__(self, uuid, logger= None, node_manager= None, extras = None):
         BaseHandler.__init__(self, uuid, logger, node_manager)
         self.verb = 'ROUTING'
+        self.ttl = 1
+        self.flood = False
         
     def handleVerb(self, data, addr, sock):
         pass
