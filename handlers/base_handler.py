@@ -42,7 +42,11 @@ class BaseHandler():
         
         sock.sendto(msg, addr)
             
-    def compile_message(self, data, ttl=self.ttl, flood=self.flood):
+    def compile_message(self, data, ttl=None, flood=None):
+        if ttl is None:
+            ttl = self.ttl
+        if flood is None:
+            flood = self.flood
         return json.dumps({
             BaseHandler.TTL : ttl,
             BaseHandler.FLOOD : flood,
