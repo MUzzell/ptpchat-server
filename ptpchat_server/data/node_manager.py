@@ -18,13 +18,10 @@ class NodeManager():
         
         self.nodes = {}
         
-        self.local_node = new Node(config.main.server_id, {
-            Node.VERSION = config.main.version,
-            Node.ATTRIBUTES = {Node.NODE_TYPE = Node.NODE_TYPE_SERVER}
+        self.local_node = Node(config.main.server_id, {
+            Node.VERSION : config.main.version,
+            Node.ATTRIBUTES : {Node.NODE_TYPE : Node.NODE_TYPE_SERVER}
             })
-        
-        if not self.is_valid_node_id(self.local_node['node_id']):
-            raise AttributeError("NodeManager init, invalid server_name or server_uuid in config")
        
     def process_nodes(self):
         self.logger.debug("pruning node list")

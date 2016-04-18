@@ -17,7 +17,7 @@ class ConfigManager():
 [Main]
 server_name : testing
 node_log_level : DEBUG
-server_uuid : 5f715c17-4a41-482a-ab1f-45fa2cdd702b
+server_id : testing@5f715c17-4a41-482a-ab1f-45fa2cdd702b
 listen_port : 9001
 listen_host : 0.0.0.0
 log_file : /var/log/ptpchat-server/server.log
@@ -64,8 +64,7 @@ log_level : INFO
         self.messages.log_level = self.config.get(ConfigManager.messages_section, "log_level")
         
     def process_main_config(self):
-        self.main.server_name = self.config.get(ConfigManager.main_section, "server_name")
-        self.main.server_uuid = self.config.get(ConfigManager.main_section, "server_uuid")
+        self.main.server_id = self.config.get(ConfigManager.main_section, "server_id")
         self.main.version = "ptpchat; 0.2"
         self.main.node_log_level = self.config.get(ConfigManager.main_section, "node_log_level")
         self.main.listen_port = self.config.getint(ConfigManager.main_section, "listen_port")

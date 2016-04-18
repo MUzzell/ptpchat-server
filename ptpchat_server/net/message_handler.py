@@ -3,8 +3,8 @@ message_handler.py
 used by ListenerServer 
 '''
 import json, socket
-import handlers
 
+import ptpchat_server.handlers as handlers
 from ptpchat_server.handlers.base_handler import BaseHandler
 from ptpchat_server.base.node import Node
 
@@ -29,15 +29,9 @@ class MessageHandler():
     MSG_TYPE = "msg_type"
     MSG_DATA = "msg_data"
 
-    '''
-    Important Note: A SocketServer will create a new instance of this 
-    class for **each** request. therefore, the logger and other elements
-    will need to be collected in this method, called once this is 
-    instantiated.
-    '''
     def __init__(self, logger, node_manager):
-        self.logger = self.server.logger
-        self.node_manager = self.node_manager
+        self.logger = logger
+        self.node_manager = node_manager
 
     def handle(self, string, client, factory):
         try:

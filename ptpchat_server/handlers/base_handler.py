@@ -63,11 +63,11 @@ class BaseHandler():
         sender_id = msg[BaseHandler.SENDER_ID] if BaseHandler.SENDER_ID in msg else None
         target_id = msg[BaseHandler.TARGET_ID] if BaseHandler.TARGET_ID in msg else None
         
-        if sender_id is None or not self.node_manager.is_valid_node_id(sender_id):
+        if sender_id is None or not Node.is_valid_node_id(sender_id):
             self.logger.warning(MessageHandler.log_invalid_node_id)
             return False
             
-        if target_id is not None and not self.node_manager.is_valid_node_id(target_id):
+        if target_id is not None and not Node.is_valid_node_id(target_id):
             self.logger.warning(MessageHandler.log_invalid_node_id)
             return False
             
@@ -91,8 +91,6 @@ class BaseHandler():
             factory.send_messages(new_msg, [x[BaseHandler.NODE_ID] for x in nodes])
         elif target_id is not None:
             factory.send_message(new_msg, target_id)
-        
-        factory.send_message(
         
     def handleVerb(self, data, client, factory):
         self.logger.error("BaseHandler.handleVerb called!")

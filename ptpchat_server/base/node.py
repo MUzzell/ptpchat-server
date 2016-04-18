@@ -24,7 +24,7 @@ class Node():
     
     @staticmethod
     def is_valid_node_id(node_id):
-        if node_id None or type(node_id) is not str:
+        if node_id is None or type(node_id) is not str:
             return False
         return Node.node_id_regex.match(node_id) is not None
     
@@ -57,7 +57,7 @@ class Node():
         if attrs is None:
             return
         
-        if type[attrs] is not dict:
+        if type(attrs) is not dict:
             raise AttributeError("Node, given 'attributes' is invalid")
         
         self.attributes = attrs        
