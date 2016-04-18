@@ -31,7 +31,6 @@ class ConnectHandler(BaseHandler):
     
     log_could_not_find_nodes = "CONNECT, could not find node(s) with given node_id(s)!"
     
-    
     ipv4_socket_match = "^((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))?\:?([0-9]{,5})?$"
 
     def __init__(self, uuid, logger= None, node_manager= None, extras = None):
@@ -95,7 +94,7 @@ class ConnectHandler(BaseHandler):
         src_node = src_node[0]
         dst_node = dst_node[0]
         
-        #type 1: dst contains IP, src contains port. Add src IP and forward to dst node.
+        #type 1: dst is null, src contains port. Add src IP and forward to dst node.
         if  ((dst_match[0] is not None and dst_match[1] is None) and 
                 (src_match[0] is None and src_match[1] is not None)):
             self.send_message(self.build_message({
@@ -104,8 +103,8 @@ class ConnectHandler(BaseHandler):
                 ConnectHandler.SRC : "%s:%s" % (src_node[BaseHandler.CLIENT_ADDR][0], src_match[1]),
                 ConnectHandler.DST : dst }), dst_node[BaseHandler.CLIENT_ADDR], sock)
            
-        #type 2: dst contains full socket, src contains full socket. Forward to src node.
-        if  ((dst_match[0] is not None and dst_match[1] is not None) and
+        #type 2: dst contains port, src contains full socket. Add dst ip and forward to src node.
+        if  ((dst_match[0] is None and dst_match[1] is not None) and
                 (src_match[0] is not None and src_match[1] is not None)):
             self.send_message(self.build_message({
                 ConnectHandler.SRC_NODE_ID : "%s" % src_node_id,

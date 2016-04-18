@@ -1,20 +1,45 @@
 
-import threading
+import threading, re
 
 class NodeManager():
 
     log_deleted_node = "NodeManager, deleted node: %s"
     log_add_node_already_exists = "NodeManager, tried to add node that already exists: %s" 
     
-    def __init__(self, logger = None):
+    node_id_pattern = "^([a-zA-Z0-9]+)@([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})$"
     
-        if logger is None:
+    def is_valid_node_id(self, node_id):
+        if node_id None or type(node_id) is not str:
+            return False
+        return self.node_id_regex.match(node_id) is not None
+    
+    def __init__(self, config, logger):
+    
+        if config is None or logger is None:
             raise AttributeError("NodeManager Init, logger is None")
        
         self.logger = logger
         self.monitor = ReadMonitor()
         
         self.nodes = {}
+        self.node_id_regex = re.compile(NodeManager.node_id_pattern);
+        
+        self.local_node = {
+            'node_id' = '%s@%s' %(config.main.server_name, config.name.server_uuid)
+        }
+        
+        if not self.is_valid_node_id(self.local_node['node_id']):
+            raise AttributeError("NodeManager init, invalid server_name or server_uuid in config")
+        
+        
+        
+    def process_nodes(self):
+        self.logger.debug("pruning node list")
+        nodes = self.get_nodes({'last_seen_lt' : time.time() - self.node_cutoff})
+        
+        if nodes is not None and len(nodes) > 0:
+            for node in nodes:
+                self.drop_node(node)
         
     '''
     Nodes are identified by their 'node_id' and NOT their 
@@ -26,6 +51,8 @@ class NodeManager():
             raise AttributeError("NodeManager, adding node without node_id")
         if 'client_addr' not in node:
             raise AttributeError("NodeManager, adding node without client_addr")
+            
+        if not is_valid_node_id(node[node_id])
 
         if len(self.get_nodes(node)) > 0: 
             self.logger.info(NodeManager.log_add_node_already_exists % node['node_id'])

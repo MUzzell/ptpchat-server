@@ -5,26 +5,94 @@ import json
 
 class BaseHandler():
 
+    log_invalid_json = "ValueError, invalid json received"
+    log_invalid_msg = "Invalid msg received, %s"
+    log_invalid_verb = "Invalid verb received"
+    log_ttl_exceeded = "TTL value for message exceeded (<=0), ignoring"
+    log_ttl_rebroadcast_exceeded = "TTL value for message broadcast exceeded"
+    log_msg_rejected = "%s message rejected"
+    log_flood_no_node_id = "Message to be flooded, but no node_id, ignoring"
+
     MSG_TYPE = 'msg_type'
     MSG_DATA = 'msg_data'
     
     NODE_ID = 'node_id'
     MSG_ID = 'msg_id'
-    CLIENT_ADDR = 'client_addr'
+    CLIENT_ADDR = 'client_client'
     LAST_SEEN = 'last_seen'
     
     TTL = 'ttl'
     FLOOD = 'flood'
     
-    def __init__(self, uuid, logger= None, node_manager= None, extras = None):
+    def __init__(self, logger= None, node_manager= None, extras = None):
         self.verb = None
         self.ttl = 1
         self.flood = False
-        self.server_uuid = uuid
         self.logger= logger
         self.node_manager= node_manager
+        
+    def handleMessage(self, msg, client, factory):
+    
+        data = msg[BaseHandler.MSG_DATA] if BaseHandler.MSG_DATA in msg else None
+        
+        if data is None or type(data) is not dict:
+            self.logger.warning(BaseHandler.log_invalid_msg % "msg_data invalid")
+            return False
+    
+        ttl = msg[BaseHandler.TTL] if BaseHandler.TTL in msg else None
+        flood = msg[BaseHandler.FLOOD] if BaseHandler.FLOOD in msg else None
+        
+        if ttl is None or type(ttl) is not int:
+            self.logger.warning(BaseHandler.log_invalid_ttl)
+            return False
             
-    def handleVerb(self, data, addr, sock):
+        if ttl <= 0:
+            self.logger.warning(BaseHandler.log_ttl_exceeded)
+            return False
+        
+        if flood is None or type(flood) is not bool:
+            self.logger.warning(BaseHandler.log_invalid_flood)
+            return False
+        
+        if data is None or type(data) is not dict:
+            self.logger.warning(BaseHandler.log_invalid_data)
+            return False
+            
+        sender_id = msg[BaseHandler.SENDER_ID] if BaseHandler.SENDER_ID in msg else None
+        target_id = msg[BaseHandler.TARGET_ID] if BaseHandler.TARGET_ID in msg else None
+        
+        if sender_id is None or not self.node_manager.is_valid_node_id(sender_id):
+            self.logger.warning(MessageHandler.log_invalid_node_id)
+            return False
+            
+        if target_id is not None and not self.node_manager.is_valid_node_id(target_id):
+            self.logger.warning(MessageHandler.log_invalid_node_id)
+            return False
+            
+        if target_id is None and not flood and ttl == 1: #for this node
+            return self.handleVerb(sender_id, data, client, factory)
+            
+        if target_id is not None and target_id == self.node_manager.local_node.node_id:
+            return self.handleVerb(sender_id, data, client, factory)
+        
+        ttl = ttl-1
+        
+        if ttl <= 0:
+            #TODO: send NACK
+            return False
+            
+        msg[BaseHandler.TTL] = ttl
+        new_msg = json.dumps(msg)
+            
+        if flood:
+            nodes = self.node_manager.get_nodes({'excluding_node_id' : sender_id})
+            factory.send_messages(new_msg, [x[BaseHandler.NODE_ID] for x in nodes])
+        elif target_id is not None:
+            factory.send_message(new_msg, target_id)
+        
+        factory.send_message(
+        
+    def handleVerb(self, data, client, factory):
         self.logger.error("BaseHandler.handleVerb called!")
         
     def buildMessage(self, data, ttl=None, flood=None):
@@ -37,11 +105,11 @@ class BaseHandler():
             self.logger.debug("given uid incorrect, %s" % ValueError)
             return None
         return val  
+       
+    def send_message(self, msg, client, sock):
+        self.logger.debug("%s, Sending message to %s:%d" % self.verb, client[0], client[1])
         
-    def send_message(self, msg, addr, sock):
-        self.logger.debug("%s, Sending message to %s:%d" % self.verb, addr[0], addr[1])
-        
-        sock.sendto(msg, addr)
+        sock.sendto(msg, client)
             
     def compile_message(self, data, ttl=None, flood=None):
         if ttl is None:

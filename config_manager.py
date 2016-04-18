@@ -10,11 +10,12 @@ import StringIO
 class ConfigManager():
 
     main_section = "Main"
-    listener_section = "Listener"
-    broadcast_section = "Broadcast"
+    communication_section = "Communication"
+    messages_section = "Messages"
 
     defaults = StringIO.StringIO("""\
 [Main]
+server_name : testing
 node_log_level : DEBUG
 server_uuid : 5f715c17-4a41-482a-ab1f-45fa2cdd702b
 listen_port : 9001
@@ -22,18 +23,18 @@ listen_host : 0.0.0.0
 log_file : /var/log/ptpchat-server/server.log
 log_to_file : True
 
-[Listener]
-log_level : INFO
-
-[Broadcast]
+[Communication]
 log_level : INFO
 loop_sleep : 2
 node_cutoff : 15
 process_nodes_interval : 30
+
+[Messages]
+log_level : INFO
 """)
     
     main_section = "Main"
-    listener_section = "Listener"
+    listener_section = "Communication"
     broadcast_section = "Broadcast"
 
     def __init__(self, config_file=None):
@@ -44,25 +45,26 @@ process_nodes_interval : 30
         else:
             self.config.readfp(ConfigManager.defaults)
           
-        self.listener = ConfigObject()
-        self.broadcast = ConfigObject()
+        self.messages = ConfigObject()
+        self.communication = ConfigObject()
         self.main = ConfigObject()
         
-        self.process_listener_config()
-        self.process_broadcast_config()
+        self.process_communication_config()
+        self.process_messages_config()
         self.process_main_config()
     
     
-    def process_listener_config(self):
-        self.listener.log_level  = self.config.get(ConfigManager.listener_section, "log_level")
-    
-    def process_broadcast_config(self):
-        self.broadcast.log_level = self.config.get(ConfigManager.broadcast_section, "log_level")
-        self.broadcast.loop_sleep = self.config.getint(ConfigManager.broadcast_section, "loop_sleep")
-        self.broadcast.node_cutoff = self.config.getint(ConfigManager.broadcast_section, "node_cutoff")
-        self.broadcast.process_nodes_interval = self.config.getint(ConfigManager.broadcast_section, "process_nodes_interval")
+    def process_communication_config(self):
+        self.communication.log_level = self.config.get(ConfigManager.communication_section, "log_level")
+        self.communication.loop_sleep = self.config.getint(ConfigManager.communication_section, "loop_sleep")
+        self.communication.node_cutoff = self.config.getint(ConfigManager.communication_section, "node_cutoff")
+        self.communication.process_nodes_interval = self.config.getint(ConfigManager.communication_section, "process_nodes_interval")
+        
+    def process_messages_config(self):
+        self.messages.log_level = self.config.get(ConfigManager.messages_section, "log_level")
         
     def process_main_config(self):
+        self.main.server_name = self.config.get(ConfigManager.main_section, "server_name")
         self.main.server_uuid = self.config.get(ConfigManager.main_section, "server_uuid")
         self.main.node_log_level = self.config.get(ConfigManager.main_section, "node_log_level")
         self.main.listen_port = self.config.getint(ConfigManager.main_section, "listen_port")

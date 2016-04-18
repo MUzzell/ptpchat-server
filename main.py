@@ -16,8 +16,8 @@ import uuid
 import signal
 
 from config_manager import ConfigManager
-from listener_server import ListenerServer
-from broadcast_server import BroadcastServer
+from comm_server import CommunicationServer
+from message_handler import MessageHandler
 from node_manager import NodeManager
 from log_manager import LogManager
 
@@ -43,40 +43,34 @@ def setup(args, config):
     
     threading.current_thread().name = "Main"
     
-    listener = ListenerServer(config,
+    message_handler = MessageHandler(logger = LogManager(
+        logger_name,
+        file_name = config.main.log_file if args.log_to_file else None,
+        module_name='message_handler',
+        log_level=config.messages.log_level if args.log_level is None else args.log_level),
+        node_manager)
+    
+    comms = CommunicationServer(config,
         logger = LogManager(
             logger_name,
             file_name = config.main.log_file if args.log_to_file else None,
-            module_name = "ListenerServer", 
+            module_name = "CommsServer", 
             log_level = config.listener.log_level if args.log_level is None else args.log_level), 
-        node_manager = node_manager)
+        node_manager, message_handler)
         
-    listener.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    #listener.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     
-    broadcast = BroadcastServer(listener.socket, config,
-        logger = LogManager(
-            logger_name,
-            file_name = config.main.log_file if args.log_to_file else None,
-            module_name = "BroadcastServer", 
-            log_level = config.broadcast.log_level if args.log_level is None else args.log_level), 
-        node_manager = node_manager)
+    comms_thread = threading.Thread(target=comms.serve_forever, name="Communication")
+    comms_thread.daemon = True
     
-    listener_thread = threading.Thread(target=listener.serve_forever, name="Listener")
-    listener_thread.daemon = True
-    
-    broadcast_thread = threading.Thread(target=broadcast.start, name="Broadcast")
-    broadcast_thread.daemon = True
-    
-    listener_thread.start()
-    broadcast_thread.start()
+    comms_thread.start()
 
     
 def shutdown(signum, frame):
     global listener, broadcast, exit_flag
     threading.current_thread().name = "Main Shutdown"
     
-    broadcast.stop()
-    listener.shutdown()
+    comms.shutdown()
     
     exit_flag.set()
     

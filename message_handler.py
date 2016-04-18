@@ -2,7 +2,7 @@
 message_handler.py
 used by ListenerServer 
 '''
-import SocketServer, json, socket
+import json, socket
 import handlers
 from handlers.base_handler import BaseHandler
 
@@ -11,12 +11,10 @@ Have you include the verb handler in handlers.__init__.py?
 '''
 __handler_classes__ = {
     "HELLO" : handlers.HelloHandler,
-    "ROUTING" : handlers.RoutingHandler,
-    "CONNECT" : handlers.ConnectHandler,
-    "CHANNEL" : handlers.ChannelHandler
+    "ROUTING" : handlers.RoutingHandler
 }
 
-class MessageHandler(SocketServer.BaseRequestHandler):
+class MessageHandler():
 
     log_invalid_json = "ValueError, invalid json received"
     log_invalid_msg = "Invalid msg received, %s"
@@ -35,19 +33,18 @@ class MessageHandler(SocketServer.BaseRequestHandler):
     will need to be collected in this method, called once this is 
     instantiated.
     '''
-    def setup(self):
+    def __init__(self, logger, node_manager):
         self.logger = self.server.logger
-        self.node_manager = self.server.node_manager
-        self.server_uuid = self.server.server_uuid
+        self.node_manager = self.node_manager
 
-    def handle(self):
+    def handle(self, string, client, factory):
         try:
-            self.handle_request(self.request[0], self.client_address, self.request[1])
+            self.handle_request(string, client, factory)
         except Exception as e:
             self.logger.error("Unhandled error in request: %s" % e.message)
     
-    def handle_request(self, data, addr, sock):
-        self.logger.debug("Message handler, received packet")
+    def handle_request(self, data, client, factory):
+        self.logger.debug("Message handler, received message")
         try:
             msg = json.loads(data)
         except ValueError:
@@ -62,40 +59,17 @@ class MessageHandler(SocketServer.BaseRequestHandler):
             self.logger.info(MessageHandler.log_invalid_msg % "msg_type invalid")
         
         verb = msg[MessageHandler.MSG_TYPE].upper()
-        data = msg[MessageHandler.MSG_DATA] if MessageHandler.MSG_DATA in msg else None
-        
-        if data is None or type(data) is not dict:
-            self.logger.warning(MessageHandler.log_invalid_msg % "msg_data invalid")
-            return
-            
-        ttl = msg[BaseHandler.TTL] if BaseHandler.TTL in msg else None
-        flood = msg[BaseHandler.FLOOD] if BaseHandler.FLOOD in msg else None
-        
-        if ttl is None or type(ttl) is not int:
-            self.logger.warning(BaseHandler.log_invalid_ttl)
-            return
-            
-        if ttl <= 0:
-            self.logger.warning(MessageHandler.log_ttl_exceeded)
-            return
-        
-        if flood is None or type(flood) is not bool:
-            self.logger.warning(BaseHandler.log_invalid_flood)
-            return
-        
-        if data is None or type(data) is not dict:
-            self.logger.warning(BaseHandler.log_invalid_data)
-            return
-        
+         
         global __handler_classes__
         
         if verb not in __handler_classes__:
             self.logger.warning(MessageHandler.log_invalid_verb)
-        
-        self.logger.debug("%s message received from %s" % (verb, "%s:%d" % addr))
+            return 
+            
+        self.logger.debug("%s message received from %s" % (verb, "%s:%d" % client))
         
         handler = __handler_classes__[verb](self.server_uuid, self.logger, self.node_manager)
-        if not handler.handle_verb(data, addr, sock):
+        if not handler.handleMessage(data, client, factory):
             self.logger.info(MessageHandler.log_message_rejected % verb)
             return
             
@@ -124,7 +98,18 @@ class MessageHandler(SocketServer.BaseRequestHandler):
                 handler.build_message(data, ttl, flood),
                 node[BaseHandler.CLIENT_ADDR], sock)
 
-        return 0
+        return
 
-    def handleVerb(self, data, addr):
-        pass
+    def broadcast_hello(self):
+        
+        nodes = self.node_manager.get_nodes(None)
+        self.logger.debug("Sending HELLO to %d nodes" % len(nodes))
+        
+        for node in nodes:
+            self.sock.sendto(self.handlers['HELLO'].buildMessage(node), node['client_client'])
+        
+    def broadcast_routing(self):
+        nodes = self.node_manager.get_nodes(None)
+        self.logger.debug("Sending ROUTING to %d nodes" % len(nodes))
+        for node in nodes:
+            self.sock.sendto(self.handlers['ROUTING'].buildMessage(node), node['client_client'])

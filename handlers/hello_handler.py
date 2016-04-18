@@ -7,15 +7,15 @@ import pdb
 class HelloHandler(BaseHandler):
 
     VERSION = 'version'
-    log_no_node_id = "HELLO, no 'node_id' in data, ignoring"
-    log_node_id_invalid = "HELLO, invalid 'node_id', ignoring"
-    log_node_id_same_as_server = "HELLO, invalid 'node_id', ignoring"
+    ATTRIBUTES = 'attributes'
+    log_invalid_sender_id = "HELLO, invalid 'sender_id', ignoring"
+    log_invalid_sender_id = "HELLO, invalid 'attributes', ignoring"
     
     log_adding_node = "HELLO, adding node: %s"
     log_updating_node = "HELLO, updating node: %s"
     
-    def __init__(self, uuid, logger= None, node_manager= None, extras = None):
-        BaseHandler.__init__(self, uuid, logger, node_manager)
+    def __init__(self, logger= None, node_manager= None, extras = None):
+        BaseHandler.__init__(self, logger, node_manager)
         self.verb = 'HELLO'
         self.ttl = 1
         self.flood = False
@@ -25,27 +25,28 @@ class HelloHandler(BaseHandler):
         else:
             self.version = 'ptpchat-server; 0.0'
     
-    def handleVerb(self, data, addr, sock):
+    def handleVerb(self, sender_id, data, client, factory):
         
-        if "node_id" not in data:
-            self.logger.warning(HelloHandler.log_no_node_id)
+        if sender_id is None:
+            self.logger.warning(HelloHandler.log_invalid_sender_id)
             return False
             
-        node_id = self.parse_uuid(data[BaseHandler.NODE_ID])
-        
-        if node_id is None:
-            self.logger.warning(HelloHandler.log_node_id_invalid)
+        if sender_id == self.node_manager.local_node[BaseHandler.NODE_ID]:
+            self.logger.warning(HelloHandler.log_invalid_sender_id)
             return False
             
-        if node_id == self.server_uuid:
-            self.logger.warning(HelloHandler.log_node_id_same_as_server)
+        if HelloHandler.ATTRIBUTES in data and type(data[HelloHandler.ATTRIBUTES]) is not dict:
+            self.logger.warning(HelloHandler.log_attriubtes_invalid)
             return False
             
-        node = self.node_manager.get_nodes({BaseHandler.NODE_ID: node_id})
+        node = self.node_manager.get_nodes({BaseHandler.NODE_ID: sender_id})
     
         if node is None or len(node) == 0 :
             self.logger.info(HelloHandler.log_adding_node % node_id)
-            self.node_manager.add_node({BaseHandler.NODE_ID : node_id, BaseHandler.CLIENT_ADDR : addr, BaseHandler.LAST_SEEN : time.time() })
+            self.node_manager.add_node({
+                BaseHandler.NODE_ID : sender_id, 
+                BaseHandler.LAST_SEEN : time.time(), 
+                NodeManager.ATTRIBUTES : data[NodeManager.ATTRIBUTES] })
         else:
             self.logger.info(HelloHandler.log_updating_node % node_id)
             node = node[0]
