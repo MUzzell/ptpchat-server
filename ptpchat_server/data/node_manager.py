@@ -30,12 +30,32 @@ class NodeManager():
         if nodes is not None and len(nodes) > 0:
             for node in nodes:
                 self.drop_node(node)
+    
+    '''
+    An acceptable node is one where either:
+        * Its TTL is one
+        * Sent us a ROUTING message to the node (with the lowest TTL)
+    '''
+    def get_node_for_target(self, target_node):
+        node = None
         
-    '''
-    Nodes are identified by their 'node_id' and NOT their 
-    ssl material.
-    If we are adding a node that has been seen before, update
-    '''
+        nodes = self.get_nodes({Node.TTL : 1})
+        
+        if nodes is None or len(nodes) == 0:
+            return node
+            
+        if target_node in nodes:
+            return target_node
+            
+        nodes = [n for n in nodes if node.connects_to(target_id)]
+        
+        if len(nodes) == 0:
+            return node
+            
+        sorted(nodes, key=lambda x: x.ttl)
+            
+        return nodes[0]
+    
     def add_node(self, node_data):
           
         if Node.NODE_ID not in node_data or not Node.is_valid_node_id(node_data[Node.NODE_ID]):
@@ -111,6 +131,8 @@ class NodeManager():
             return_node = node if filter[Node.NODE_ID] == node.node_id else None
         if Node.BASE_ID in filter:
             return_node = node if filter[Node.BASE_ID] == node.base_id else None
+        if Node.TTL in filter:
+            return_node = node if filter[Node.TTL] == node.ttl else None
         if 'excluding_base_id' in filter:
             return_node = node if filter[Node.BASE_ID] != node.base_id else None
         if 'last_seen_lt' in filter:

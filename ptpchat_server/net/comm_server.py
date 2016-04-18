@@ -11,6 +11,7 @@ class MessageReceiver(Int32StringReceiver):
     def __init__(self, message_handler, addr):
         self.message_handler = message_handler
         self.addr = addr
+        self.node = None
 
     def connectionMade(self):
         self.factory.connectionAdded(self)
@@ -52,7 +53,17 @@ class MessageFactory(Factory):
         self.broadcast_routing()
         
     def send_message(self, data, target_id):
-        pass
+        node = self.node_manager.get_node_for_target(target_id)
+        
+        if node is None:
+            return
+        
+        clients = [x for x in self.clients if x.node == node]
+        
+        if clients is None or len(clients) == 0:
+            return
+            
+        clients[0].sendString(data)
         
     def send_messages(self, data, target_ids):
     

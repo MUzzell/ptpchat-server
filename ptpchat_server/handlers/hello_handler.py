@@ -56,7 +56,7 @@ class HelloHandler(BaseHandler):
         
         client.set_node(node)
         
-
+        client.sendString(self.buildMessage(None))
             
         return True
             
