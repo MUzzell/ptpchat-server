@@ -1,4 +1,5 @@
 
+from ptpchat_server.base.node import Node
 from base_handler import BaseHandler
 import time
 
@@ -20,7 +21,7 @@ class RoutingHandler(BaseHandler):
     
     def buildMessage(self, data, ttl=None, flood=None):
         
-        nodes = [{BaseHandler.NODE_ID : "%s" % x[BaseHandler.NODE_ID], RoutingHandler.ADDRESS : "%s:%d" % x[BaseHandler.CLIENT_ADDR]} for x in self.node_manager.get_nodes(None)]
+        nodes = [{Node.NODE_ID : "%s" % x.node_id, Node.TTL : x.ttl} for x in self.node_manager.get_nodes(None)]
         
         return self.compile_message({ 
             BaseHandler.NODE_ID : "%s" % self.server_uuid,
