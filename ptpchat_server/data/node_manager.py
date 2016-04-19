@@ -23,7 +23,7 @@ class NodeManager():
             Node.ATTRIBUTES : {Node.NODE_TYPE : Node.NODE_TYPE_SERVER}
             })
        
-    def process_nodes(self):
+    def update_nodes(self):
         self.logger.debug("pruning node list")
         nodes = self.get_nodes({'last_seen_lt' : time.time() - self.node_cutoff})
         

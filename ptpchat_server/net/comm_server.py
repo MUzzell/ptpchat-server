@@ -79,7 +79,7 @@ class CommunicationServer():
     def __init__(self, config, logger, node_manager, message_handler):
        
         if logger is None or node_manager is None or config is None:
-            raise AttributeError("ListenerServer Init, logger, config, or node_manager is None")
+            raise AttributeError("CommunicationServer Init, logger, config, or node_manager is None")
             
         self.logger = logger
        
@@ -95,14 +95,16 @@ class CommunicationServer():
         self.factory.broadcast()
         
     def serve_forever(self):
-        self.logger.info("ListenerServer starting up")
+        self.logger.info("CommunicationServer starting up")
         self.logger.debug("Listening on: %s:%d" % self.server_address)
         self.broadcast_loop.start(10, now=False)
         reactor.run()
         
     def shutdown(self):
-        self.logger.info("ListenerServer shutting down")
+        self.logger.info("CommunicationServer shutting down")
+        self.logger.debug("Stopping looping call")
         self.broadcast_loop.stop()
+        self.logger.debug("Stopping reactor")
         reactor.stop()
         
         
