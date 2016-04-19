@@ -31,28 +31,16 @@ def setup(args, config):
     global comms
     addr = (config.main.listen_host, config.main.listen_port)
     
-    node_manager = NodeManager(config, LogManager(
+    logger = LogManager(
         logger_name,
         file_name = config.main.log_file if args.log_to_file else None,
-        module_name='node_manager', 
-        log_level=config.main.node_log_level if args.log_level is None else args.log_level))
+        log_level=config.main.node_log_level if args.log_level is None else args.log_level)
     
-    threading.current_thread().name = "Main"
+    node_manager = NodeManager(config, logger)
     
-    message_handler = MessageHandler(LogManager(
-        logger_name,
-        file_name = config.main.log_file if args.log_to_file else None,
-        module_name='message_handler',
-        log_level=config.messages.log_level if args.log_level is None else args.log_level),
-        node_manager)
+    message_handler = MessageHandler(logger, node_manager)
     
-    comms = CommunicationServer(config,
-        LogManager(
-            logger_name,
-            file_name = config.main.log_file if args.log_to_file else None,
-            module_name = "CommsServer", 
-            log_level = config.communication.log_level if args.log_level is None else args.log_level), 
-        node_manager, message_handler)
+    comms = CommunicationServer(config, logger, node_manager, message_handler)
         
     #listener.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     
@@ -63,8 +51,6 @@ def setup(args, config):
     
 def shutdown(signum, frame):
     global comms, exit_flag
-    threading.current_thread().name = "Main Shutdown"
-    
     comms.shutdown()
     
     exit_flag.set()

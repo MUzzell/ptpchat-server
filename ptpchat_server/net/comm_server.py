@@ -50,8 +50,8 @@ class MessageFactory(Factory):
         
     def broadcast(self):
         self.node_manager.update_nodes()
-        self.broadcast_hello()
-        self.broadcast_routing()
+        self.message_handler.broadcast_hello()
+        self.message_handler.broadcast_routing()
         
     def send_message(self, data, target_id):
         node = self.node_manager.get_node_for_target(target_id)
