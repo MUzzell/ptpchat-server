@@ -45,21 +45,14 @@ def setup(args, config):
     #listener.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     
     
-    if not args.no_start:
+    if args.start:
         comms.serve_forever()
 
-    
-def shutdown(signum, frame):
-    global comms, exit_flag
-    comms.shutdown()
-    
-    exit_flag.set()
-    
 def process_args(args):
     parser = argparse.ArgumentParser(description="ptpchat-server, main function. These arguments supersede any config file arguments")
     parser.add_argument('--log', dest='log_level', default=None, help="set a global log level")
     parser.add_argument('--no-log', dest='log_to_file', action='store_false', help="disable file logging")
-    parser.add_argument('--no-start', dest='no_start', action='store_true', default=False, help="just setup and close")
+    parser.add_argument('--no-start', dest='start', action='store_false', default=True, help="just setup and close")
     return parser.parse_args(args)
     
 if __name__ == '__main__':
@@ -67,20 +60,3 @@ if __name__ == '__main__':
     args = process_args(sys.argv[1:])
     config = ConfigManager('/etc/ptpchat-server/server.cfg')
     setup(args, config)
-    
-    if args.no_start:
-        quit()
-        
-    signal.signal(signal.SIGINT, shutdown)
-    signal.signal(signal.SIGTERM, shutdown)
-    exit_flag = threading.Event()
-    exit_flag.clear()
-    
-    if platform.system() is 'Windows':
-        while exit_flag.is_set() is False:
-            try:
-                exit_flag.wait(5)
-            except IOError:
-                pass
-    else:
-        signal.pause()

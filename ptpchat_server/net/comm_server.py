@@ -105,9 +105,3 @@ class CommunicationServer():
         self.observer.start()
         reactor.run()
         
-    def shutdown(self):
-        self.logger.info("CommunicationServer shutting down")
-        self.logger.debug("Stopping reactor")
-        reactor.callFromThread(reactor.stop)
-        
-        
