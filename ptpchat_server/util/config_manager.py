@@ -25,7 +25,7 @@ log_to_file : True
 
 [Communication]
 log_level : INFO
-loop_sleep : 2
+broadcast_loop_interval : 2
 node_cutoff : 15
 process_nodes_interval : 30
 
@@ -56,7 +56,7 @@ log_level : INFO
     
     def process_communication_config(self):
         self.communication.log_level = self.config.get(ConfigManager.communication_section, "log_level")
-        self.communication.loop_sleep = self.config.getint(ConfigManager.communication_section, "loop_sleep")
+        self.communication.broadcast_loop_interval = self.config.getint(ConfigManager.communication_section, "broadcast_loop_interval")
         self.communication.node_cutoff = self.config.getint(ConfigManager.communication_section, "node_cutoff")
         self.communication.process_nodes_interval = self.config.getint(ConfigManager.communication_section, "process_nodes_interval")
         

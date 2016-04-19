@@ -1,5 +1,5 @@
 
-import threading, re
+import threading, re, time
 
 from ptpchat_server.base.node import Node
 
@@ -12,6 +12,8 @@ class NodeManager():
     
         if config is None or logger is None:
             raise AttributeError("NodeManager Init, logger is None")
+            
+        self.node_cutoff = config.communication.node_cutoff
        
         self.logger = logger
         self.monitor = ReadMonitor()

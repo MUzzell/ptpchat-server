@@ -2,6 +2,7 @@
 from twisted.internet.protocol import Factory
 from twisted.protocols.basic import Int32StringReceiver
 from twisted.internet import reactor, protocol, task
+from twisted.python import log
 
 from message_handler import MessageHandler
 from ptpchat_server.base.node import Node
@@ -82,13 +83,16 @@ class CommunicationServer():
             raise AttributeError("CommunicationServer Init, logger, config, or node_manager is None")
             
         self.logger = logger
-       
+        self.observer = log.PythonLoggingObserver(loggerName='ptpchat-server')
         self.server_address = (config.main.listen_host, config.main.listen_port)
+        
+        self.process_nodes_interval = config.communication.process_nodes_interval
+        self.broadcast_loop_interval = config.communication.broadcast_loop_interval
         
         self.factory = MessageFactory(config, logger, node_manager, message_handler)
         
         reactor.listenTCP(config.main.listen_port, self.factory)
-        
+
         self.broadcast_loop = task.LoopingCall(self.broadcast)
         
     def broadcast(self):
@@ -97,14 +101,13 @@ class CommunicationServer():
     def serve_forever(self):
         self.logger.info("CommunicationServer starting up")
         self.logger.debug("Listening on: %s:%d" % self.server_address)
-        self.broadcast_loop.start(10, now=False)
+        self.broadcast_loop.start(self.broadcast_loop_interval, now=False)
+        self.observer.start()
         reactor.run()
         
     def shutdown(self):
         self.logger.info("CommunicationServer shutting down")
-        self.logger.debug("Stopping looping call")
-        self.broadcast_loop.stop()
         self.logger.debug("Stopping reactor")
-        reactor.stop()
+        reactor.callFromThread(reactor.stop)
         
         
