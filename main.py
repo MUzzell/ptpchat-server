@@ -28,7 +28,7 @@ logger_name = "ptpchat-server"
 #file_name = '/var/log/ptpchat-server/ptpchat-server.log'
 
 def setup(args, config):
-    global listener, broadcast
+    global comms
     addr = (config.main.listen_host, config.main.listen_port)
     
     node_manager = NodeManager(config, LogManager(
@@ -56,15 +56,13 @@ def setup(args, config):
         
     #listener.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     
-    comms_thread = threading.Thread(target=comms.serve_forever, name="Communication")
-    comms_thread.daemon = True
     
     if not args.no_start:
-        comms_thread.start()
+        comms.serve_forever()
 
     
 def shutdown(signum, frame):
-    global listener, broadcast, exit_flag
+    global comms, exit_flag
     threading.current_thread().name = "Main Shutdown"
     
     comms.shutdown()
@@ -75,7 +73,7 @@ def process_args(args):
     parser = argparse.ArgumentParser(description="ptpchat-server, main function. These arguments supersede any config file arguments")
     parser.add_argument('--log', dest='log_level', default=None, help="set a global log level")
     parser.add_argument('--no-log', dest='log_to_file', action='store_false', help="disable file logging")
-    parser.add_argument('--no-start', dest='no_start', action='store_true', help="just setup and close")
+    parser.add_argument('--no-start', dest='no_start', action='store_true', default=False, help="just setup and close")
     return parser.parse_args(args)
     
 if __name__ == '__main__':

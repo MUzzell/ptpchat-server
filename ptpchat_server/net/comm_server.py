@@ -80,6 +80,8 @@ class CommunicationServer():
        
         if logger is None or node_manager is None or config is None:
             raise AttributeError("ListenerServer Init, logger, config, or node_manager is None")
+            
+        self.logger = logger
        
         self.server_address = (config.main.listen_host, config.main.listen_port)
         
