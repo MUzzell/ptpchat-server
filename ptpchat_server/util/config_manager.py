@@ -16,7 +16,7 @@ class ConfigManager():
     defaults = StringIO.StringIO("""\
 [Main]
 server_name : testing
-node_log_level : DEBUG
+log_level : INFO
 server_id : testing@5f715c17-4a41-482a-ab1f-45fa2cdd702b
 listen_port : 9001
 listen_host : 0.0.0.0
@@ -24,7 +24,6 @@ log_file : /var/log/ptpchat-server/server.log
 log_to_file : True
 
 [Communication]
-log_level : INFO
 broadcast_loop_interval : 2
 node_cutoff : 15
 process_nodes_interval : 30
@@ -55,7 +54,6 @@ log_level : INFO
     
     
     def process_communication_config(self):
-        self.communication.log_level = self.config.get(ConfigManager.communication_section, "log_level")
         self.communication.broadcast_loop_interval = self.config.getint(ConfigManager.communication_section, "broadcast_loop_interval")
         self.communication.node_cutoff = self.config.getint(ConfigManager.communication_section, "node_cutoff")
         self.communication.process_nodes_interval = self.config.getint(ConfigManager.communication_section, "process_nodes_interval")
@@ -66,7 +64,7 @@ log_level : INFO
     def process_main_config(self):
         self.main.server_id = self.config.get(ConfigManager.main_section, "server_id")
         self.main.version = "ptpchat; 0.2"
-        self.main.node_log_level = self.config.get(ConfigManager.main_section, "node_log_level")
+        self.main.log_level = self.config.get(ConfigManager.main_section, "log_level")
         self.main.listen_port = self.config.getint(ConfigManager.main_section, "listen_port")
         self.main.listen_host = self.config.get(ConfigManager.main_section, "listen_host")
         self.main.log_file = self.config.get(ConfigManager.main_section, "log_file")

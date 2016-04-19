@@ -34,7 +34,7 @@ def setup(args, config):
     logger = LogManager(
         logger_name,
         file_name = config.main.log_file if args.log_to_file else None,
-        log_level=config.main.node_log_level if args.log_level is None else args.log_level)
+        log_level=config.main.log_level if args.log_level is None else args.log_level)
     
     node_manager = NodeManager(config, logger)
     
