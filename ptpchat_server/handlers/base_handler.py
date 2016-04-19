@@ -7,9 +7,7 @@ import json
 
 class BaseHandler():
 
-    log_invalid_json = "ValueError, invalid json received"
-    log_invalid_msg = "Invalid msg received, %s"
-    log_invalid_verb = "Invalid verb received"
+    log_invalid_node_id = "Received node id in sender or target is invalid, ignoring"
     log_ttl_exceeded = "TTL value for message exceeded (<=0), ignoring"
     log_ttl_rebroadcast_exceeded = "TTL value for message broadcast exceeded"
     log_msg_rejected = "%s message rejected"
@@ -64,11 +62,11 @@ class BaseHandler():
         target_id = msg[BaseHandler.TARGET_ID] if BaseHandler.TARGET_ID in msg else None
         
         if sender_id is None or not Node.is_valid_node_id(sender_id):
-            self.logger.warning(MessageHandler.log_invalid_node_id)
+            self.logger.warning(BaseHandler.log_invalid_node_id)
             return False
             
         if target_id is not None and not Node.is_valid_node_id(target_id):
-            self.logger.warning(MessageHandler.log_invalid_node_id)
+            self.logger.warning(BaseHandler.log_invalid_node_id)
             return False
             
         if target_id is None and not flood and ttl == 1: #for this node

@@ -2,7 +2,7 @@
 message_handler.py
 used by ListenerServer 
 '''
-import json, socket
+import json, socket, pdb
 
 import ptpchat_server.handlers as handlers
 from ptpchat_server.handlers.base_handler import BaseHandler
@@ -21,10 +21,7 @@ class MessageHandler():
     log_invalid_json = "ValueError, invalid json received"
     log_invalid_msg = "Invalid msg received, %s"
     log_invalid_verb = "Invalid verb received"
-    log_ttl_exceeded = "TTL value for message exceeded (<=0), ignoring"
-    log_ttl_rebroadcast_exceeded = "TTL value for message broadcast exceeded"
     log_msg_rejected = "%s message rejected"
-    log_flood_no_node_id = "Message to be flooded, but no node_id, ignoring"
     
     MSG_TYPE = "msg_type"
     MSG_DATA = "msg_data"
@@ -62,50 +59,30 @@ class MessageHandler():
             self.logger.warning(MessageHandler.log_invalid_verb)
             return 
             
-        self.logger.debug("%s message received from %s" % (verb, "%s:%d" % client))
+        self.logger.debug("%s message received from %s:%d" % (verb, client.addr.host, client.addr.port))
         
-        handler = __handler_classes__[verb](self.server_uuid, self.logger, self.node_manager)
-        if not handler.handleMessage(data, client, factory):
-            self.logger.info(MessageHandler.log_message_rejected % verb)
-            return
+        handler = __handler_classes__[verb](self.logger, self.node_manager)
+        if not handler.handleMessage(msg, client, factory):
+            self.logger.info(MessageHandler.log_msg_rejected % verb)
             
-        #TODO: handle relaying
-            
-        if not flood:
-            return 0
-            
-        ttl = ttl - 1
-        
-        if ttl <= 0:
-            self.logger.info(MessageHandler.log_ttl_rebroadcast_exceeded)
-            
-        if 'node_id' not in data:
-            self.logger.info(log_flood_no_node_id)
-            return 0
-            
-        #At this point, the node_id 'should' be verified.
-        #OK, this has to be bad practice :S
-        node_id = data[BaseHandler.NODE_ID]
-        
-        nodes = self.node_manager.getNodes({'excluding_node_id' : node_id})
-        
-        for node in nodes:
-            handler.send_message(
-                handler.build_message(data, ttl, flood),
-                node[BaseHandler.CLIENT_ADDR], sock)
-
         return
 
-    def broadcast_hello(self):
-        
+    def broadcast_hello(self, factory):
+    
+        global __handler_classes__
         nodes = self.node_manager.get_nodes(None)
         self.logger.debug("Sending HELLO to %d nodes" % len(nodes))
         
+        handler = __handler_classes__['HELLO'](self.logger, self.node_manager)
         for node in nodes:
-            self.sock.sendto(self.handlers['HELLO'].buildMessage(node), node['client_client'])
+            factory.send_message(handler.buildMessage(node), node)
         
-    def broadcast_routing(self):
+    def broadcast_routing(self, factory):
+    
+        global __handler_classes__
         nodes = self.node_manager.get_nodes(None)
         self.logger.debug("Sending ROUTING to %d nodes" % len(nodes))
+        
+        handler = __handler_classes__['ROUTING'](self.logger, self.node_manager)
         for node in nodes:
-            self.sock.sendto(self.handlers['ROUTING'].buildMessage(node), node['client_client'])
+            factory.send_message(handler.buildMessage(node), node)

@@ -9,10 +9,11 @@ from ptpchat_server.base.node import Node
 
 class MessageReceiver(Int32StringReceiver):
 
-    def __init__(self, message_handler, addr):
+    def __init__(self, message_handler, addr, factory):
         self.message_handler = message_handler
         self.addr = addr
         self.node = None
+        self.factory = factory
 
     def connectionMade(self):
         self.factory.connectionAdded(self)
@@ -28,8 +29,8 @@ class MessageReceiver(Int32StringReceiver):
         
 class MessageFactory(Factory):
 
-    log_connection_added = "Client connection added: %s"
-    log_connection_removed = "Client connection removed; %s"
+    log_connection_added = "Client connection added: %s:%d"
+    log_connection_removed = "Client connection removed; %s:%d"
     
     def __init__(self, config, logger, node_manager, message_handler):
         self.logger = logger;
@@ -38,23 +39,23 @@ class MessageFactory(Factory):
         self.clients = []
         
     def buildProtocol(self, addr):
-        return MessageReceiver(self.message_handler, addr)
+        return MessageReceiver(self.message_handler, addr, self)
         
     def connectionAdded(self, client):
-        self.logger.info(log_connection_added % client)
-        self.clients.add(client)
+        self.logger.info(MessageFactory.log_connection_added % (client.addr.host, client.addr.port))
+        self.clients.append(client)
         
     def connectionRemoved(self, client):
-        self.logger.info(log_connection_removed % client)
+        self.logger.info(MessageFactory.log_connection_removed % (client.addr.host, client.addr.port))
         self.clients.remove(client)
         
     def broadcast(self):
         self.node_manager.update_nodes()
-        self.message_handler.broadcast_hello()
-        self.message_handler.broadcast_routing()
+        self.message_handler.broadcast_hello(self)
+        self.message_handler.broadcast_routing(self)
         
-    def send_message(self, data, target_id):
-        node = self.node_manager.get_node_for_target(target_id)
+    def send_message(self, data, target_node):
+        node = self.node_manager.get_node_for_target(target_node)
         
         if node is None:
             return

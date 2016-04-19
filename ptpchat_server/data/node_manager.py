@@ -96,7 +96,7 @@ class NodeManager():
         
     def drop_node(self, node):
     
-        if type(node) is not Node:
+        if node is None:
             raise AttributeError("NodeManager, invalid node in update")
         
         base_id = node.base_id
@@ -110,7 +110,7 @@ class NodeManager():
         self.monitor.start_write()
         del self.nodes[base_id]
         self.monitor.end_write()
-        self.logger.info(NodeManager.log_deleted_node % node_id)
+        self.logger.info(NodeManager.log_deleted_node % node.node_id)
     
     def get_channels(self):
         pass

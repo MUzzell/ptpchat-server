@@ -41,7 +41,7 @@ class HelloHandler(BaseHandler):
     
         if nodes is None or len(nodes) == 0 :
             self.logger.info(HelloHandler.log_adding_node % sender_id)
-            self.node_manager.add_node({
+            node = self.node_manager.add_node({
                 Node.NODE_ID : sender_id, 
                 Node.TTL : 1,
                 Node.LAST_SEEN : time.time(), 
@@ -54,8 +54,10 @@ class HelloHandler(BaseHandler):
             node.ttl = 1
             self.node_manager.update_node(node)
         
+        self.logger.debug("Attributing client %s:%d to node %s" % (client.addr.host, client.addr.port, node.node_id))
         client.set_node(node)
         
+        self.logger.debug("Sending response HELLO to node %s" % node.node_id);
         client.sendString(self.buildMessage(None))
             
         return True

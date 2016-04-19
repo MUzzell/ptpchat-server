@@ -24,7 +24,7 @@ class Node():
     
     @staticmethod
     def is_valid_node_id(node_id):
-        if node_id is None or type(node_id) is not str:
+        if node_id is None:
             return False
         return Node.node_id_regex.match(node_id) is not None
     
@@ -68,4 +68,6 @@ class Node():
         return len([n for n in self.connections if n == node]) > 0
         
     def __eq__(self, other):
+        if type(other) is not Node:
+            return False
         return self.base_id == other.base_id
