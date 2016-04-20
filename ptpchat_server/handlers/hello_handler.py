@@ -10,7 +10,7 @@ class HelloHandler(BaseHandler):
     VERSION = 'version'
     ATTRIBUTES = 'attributes'
     log_invalid_sender_id = "HELLO, invalid 'sender_id', ignoring"
-    log_invalid_sender_id = "HELLO, invalid 'attributes', ignoring"
+    log_invalid_attributes = "HELLO, invalid 'attributes', ignoring"
     
     log_adding_node = "HELLO, adding node: %s"
     log_updating_node = "HELLO, updating node: %s"
@@ -32,7 +32,7 @@ class HelloHandler(BaseHandler):
             return False
             
         if Node.ATTRIBUTES in data and type(data[Node.ATTRIBUTES]) is not dict:
-            self.logger.warning(HelloHandler.log_attriubtes_invalid)
+            self.logger.warning(HelloHandler.log_invalid_attriubtes)
             return False
             
         nodes = self.node_manager.get_nodes({Node.NODE_ID: sender_id})

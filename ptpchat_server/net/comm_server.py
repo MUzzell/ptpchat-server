@@ -17,6 +17,7 @@ class MessageReceiver(Int32StringReceiver):
 
     def connectionMade(self):
         self.factory.connectionAdded(self)
+        self.transport.setTcpKeepAlive(1)
         
     def connectionLost(self, reason):
         self.factory.connectionRemoved(self)

@@ -3,7 +3,7 @@
 # Experimental ptpchat-server (UDP)
 # Very much wip
 #
-# TODO: Most verbs, a timeout on known_ips, threading.
+# TODO: Most verbs, threading.
 #
 
 import pdb, os, datetime, sys, platform
