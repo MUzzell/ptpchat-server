@@ -51,7 +51,6 @@ class Node():
         self.version = node_data[Node.VERSION] if Node.VERSION in node_data else None
         self.last_seen = node_data[Node.LAST_SEEN] if Node.LAST_SEEN in node_data else None
         self.ttl = node_data[Node.TTL] if Node.TTL in node_data else 32 #default TTL
-        self.connect_via = node_data[Node.CONNECT_VIA] if Node.CONNECT_VIA in node_data else None
         
         attrs = node_data[Node.ATTRIBUTES] if Node.ATTRIBUTES in node_data else None
         

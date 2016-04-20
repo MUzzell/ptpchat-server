@@ -22,6 +22,8 @@ class RoutingHandler(BaseHandler):
         self.flood = False
         
     def handleVerb(self, sender_id, data, client, factory):
+    
+        sender_node = None
         
         if RoutingHandler.NODES not in data or type(data[RoutingHandler.NODES]) is not list:
             self.logger.warning(RoutingHandler.log_invalid_nodes)
@@ -43,7 +45,7 @@ class RoutingHandler(BaseHandler):
                 continue
                 
             if Node.NODE_ID in node and Node.is_valid_node_id(node[Node.NODE_ID]):
-                node_id = node[Node.NODE_ID]
+                node_id = Node.parse_node_id(node[Node.NODE_ID])
             else:
                 self.logger.warning(RoutingHandler.log_invalid_nodes_entry)
                 continue
@@ -54,20 +56,27 @@ class RoutingHandler(BaseHandler):
                 self.logger.warning(RoutingHandler.log_invalid_nodes_entry)
                 continue
                 
-            nodes = self.node_manager.get_nodes({Node.NODE_ID : node_id})
+            routing_node = None
             
-            ttl = ttl +1
+            if node_id[1] in sender_node.connections and sender_node.connections[node_id[1]] == ttl:
+                self.logger.debug("ROUTING ttl for node %s has not changed, ignoring" % node[Node.NODE_ID])
+                continue
+            
+            nodes = self.node_manager.get_nodes({Node.BASE_ID : node_id[1]})
             
             if nodes is None or len(nodes) == 0:
-                self.addRoutingNode(node_id, ttl)
+                routing_node = self.addRoutingNode(node_id, ttl+1)
+                sender_node.connections[routing_node.base_id] = ttl
             else:
                 routing_node = nodes[0]
+                sender_node.connections[routing_node.base_id] = ttl
                 if routing_node.ttl > ttl:
                     self.logger.info(RoutingHandler.log_updating_ttl % routing_node.base_id)
-                    routing_node.ttl = ttl
-                    routing_node.connect_via = sender_node.base_id
+                    routing_node.ttl = ttl+1
                     self.node_manager.update_node(routing_node)
-                
+            
+            self.node_manager.update_node(sender_node)
+             
     def addRoutingNode(node_id, ttl):
         pass
     
