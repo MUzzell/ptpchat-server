@@ -24,6 +24,7 @@ class MessageReceiver(Int32StringReceiver):
         
     def set_node(self, node):
         self.node = node
+        self.factory.attachNode(self,node);
 
     def stringReceived(self, string):
         self.message_handler.handle(string, self, self.factory)
@@ -49,6 +50,9 @@ class MessageFactory(Factory):
     def connectionRemoved(self, client):
         self.logger.info(MessageFactory.log_connection_removed % (client.addr.host, client.addr.port))
         self.clients.remove(client)
+        if client.node is not None:
+            client.node.isConnected = False
+            self.node_manager.update_node(client.node)
         
     def broadcast(self):
         self.node_manager.update_nodes()

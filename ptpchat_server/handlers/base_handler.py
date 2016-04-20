@@ -12,6 +12,7 @@ class BaseHandler():
     log_ttl_rebroadcast_exceeded = "TTL value for message broadcast exceeded"
     log_msg_rejected = "%s message rejected"
     log_flood_no_node_id = "Message to be flooded, but no node_id, ignoring"
+    log_invalid_sender_id = "Invalid 'sender_id', ignoring"
 
     MSG_TYPE = 'msg_type'
     MSG_DATA = 'msg_data'
@@ -63,6 +64,10 @@ class BaseHandler():
         
         if sender_id is None or not Node.is_valid_node_id(sender_id):
             self.logger.warning(BaseHandler.log_invalid_node_id)
+            return False
+            
+        if sender_id == self.node_manager.local_node.node_id:
+            self.logger.warning(BaseHandler.log_invalid_sender_id)
             return False
             
         if target_id is not None and not Node.is_valid_node_id(target_id):

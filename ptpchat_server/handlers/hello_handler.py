@@ -49,7 +49,7 @@ class HelloHandler(BaseHandler):
                 Node.VERSION : data[Node.VERSION] if Node.VERSION in data else None})
         else:
             self.logger.info(HelloHandler.log_updating_node % sender_id)
-            node = node[0]
+            node = nodes[0]
             node.last_seen = time.time()
             node.ttl = 1
             self.node_manager.update_node(node)

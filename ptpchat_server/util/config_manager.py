@@ -63,7 +63,7 @@ log_level : INFO
         
     def process_main_config(self):
         self.main.server_id = self.config.get(ConfigManager.main_section, "server_id")
-        self.main.version = "ptpchat; 0.2"
+        self.main.version = "ptpchat-server; 0.2"
         self.main.log_level = self.config.get(ConfigManager.main_section, "log_level")
         self.main.listen_port = self.config.getint(ConfigManager.main_section, "listen_port")
         self.main.listen_host = self.config.get(ConfigManager.main_section, "listen_host")

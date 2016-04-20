@@ -1,5 +1,5 @@
 
-import threading, re, time
+import threading, re, time, operator
 
 from ptpchat_server.base.node import Node
 
@@ -39,24 +39,23 @@ class NodeManager():
         * Sent us a ROUTING message to the node (with the lowest TTL)
     '''
     def get_node_for_target(self, target_node):
-        node = None
         
         nodes = self.get_nodes({Node.TTL : 1})
         
         if nodes is None or len(nodes) == 0:
-            return node
+            return None
             
         if target_node in nodes:
             return target_node
             
-        nodes = [n for n in nodes if node.connects_to(target_id)]
+        connecting_nodes = [(n, n.connections[target_node.base_id]) for n in nodes if node.connects_to(target_node)]
         
         if len(nodes) == 0:
-            return node
+            return None
+           
+        sorted(connecting_nodes, key=lambda x: x[1])
             
-        sorted(nodes, key=lambda x: x.ttl)
-            
-        return nodes[0]
+        return connecting_nodes[0][0]
     
     def add_node(self, node_data):
           

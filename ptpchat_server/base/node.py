@@ -47,13 +47,13 @@ class Node():
         if node_data is None:
             return
             
-        self.connections = []
+        self.connections = {}
         self.version = node_data[Node.VERSION] if Node.VERSION in node_data else None
         self.last_seen = node_data[Node.LAST_SEEN] if Node.LAST_SEEN in node_data else None
         self.ttl = node_data[Node.TTL] if Node.TTL in node_data else 32 #default TTL
+        self.connect_via = node_data[Node.CONNECT_VIA] if Node.CONNECT_VIA in node_data else None
         
         attrs = node_data[Node.ATTRIBUTES] if Node.ATTRIBUTES in node_data else None
-        
         
         if attrs is None:
             return
@@ -65,7 +65,7 @@ class Node():
         self.node_type = attrs[Node.NODE_TYPE] if Node.NODE_TYPE in attrs else None
         
     def connects_to(self, node):
-        return len([n for n in self.connections if n == node]) > 0
+        return len([n for n in self.connections if n == node.base_id]) > 0
         
     def __eq__(self, other):
         if type(other) is not Node:
