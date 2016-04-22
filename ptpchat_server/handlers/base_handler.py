@@ -94,9 +94,12 @@ class BaseHandler():
             factory.send_messages(new_msg, [x[BaseHandler.NODE_ID] for x in nodes])
         elif target_id is not None:
             factory.send_message(new_msg, target_id)
+            
+        return True
         
     def handleVerb(self, data, client, factory):
         self.logger.error("BaseHandler.handleVerb called!")
+        return False
         
     def buildMessage(self, data, target_id=None, ttl=None, flood=None):
         self.logger.error("BaseHandler.buildVerb called!")

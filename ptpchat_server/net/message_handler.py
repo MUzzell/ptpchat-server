@@ -13,7 +13,10 @@ Have you include the verb handler in handlers.__init__.py?
 '''
 __handler_classes__ = {
     "HELLO" : handlers.HelloHandler,
-    "ROUTING" : handlers.RoutingHandler
+    "ROUTING" : handlers.RoutingHandler,
+    #temporary additions for testing
+    "CHANNEL" : BaseHandler,
+    "MESSAGE" : BaseHandler
 }
 
 class MessageHandler():
