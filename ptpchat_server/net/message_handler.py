@@ -64,7 +64,7 @@ class MessageHandler():
             
         self.logger.debug("%s message received from %s:%d" % (verb, client.addr.host, client.addr.port))
         
-        handler = __handler_classes__[verb](self.logger, self.node_manager)
+        handler = MessageHandler.handler_classes[verb](self.logger, self.node_manager)
         if not handler.handleMessage(msg, client, factory):
             self.logger.info(MessageHandler.log_msg_rejected % verb)
             
