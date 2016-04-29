@@ -24,7 +24,7 @@ class MessageReceiver(Int32StringReceiver):
         
     def set_node(self, node):
         self.node = node
-        self.factory.attachNode(self,node);
+        #self.factory.attachNode(self,node);
 
     def stringReceived(self, string):
         self.message_handler.handle(string, self, self.factory)

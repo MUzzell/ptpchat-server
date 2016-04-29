@@ -76,12 +76,12 @@ class NodeManager():
         
     def update_node(self, node):
     
-        if type(node) is not Node:
+        if node is None or not isinstance(node, Node):
             raise AttributeError("NodeManager, invalid node in update")
         
         self.monitor.start_read()
         
-        if node.node_id not in self.nodes:
+        if node.base_id not in self.nodes:
             self.monitor.end_read()
             raise AttributeError("NodeManager, updating node not in nodes!")
         
@@ -95,7 +95,7 @@ class NodeManager():
         
     def drop_node(self, node):
     
-        if node is None:
+        if node is None or not isinstance(node, Node):
             raise AttributeError("NodeManager, invalid node in update")
         
         base_id = node.base_id

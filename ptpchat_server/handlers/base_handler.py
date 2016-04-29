@@ -8,6 +8,7 @@ import json
 class BaseHandler():
 
     log_invalid_node_id = "Received node id in sender or target is invalid, ignoring"
+    log_invalid_msg_id = "Received msg_id is invalid, ignoring"
     log_ttl_exceeded = "TTL value for message exceeded (<=0), ignoring"
     log_ttl_rebroadcast_exceeded = "TTL value for message broadcast exceeded"
     log_msg_rejected = "%s message rejected"
@@ -42,6 +43,7 @@ class BaseHandler():
     
         ttl = msg[BaseHandler.TTL] if BaseHandler.TTL in msg else None
         flood = msg[BaseHandler.FLOOD] if BaseHandler.FLOOD in msg else None
+        msg_id = msg[BaseHandler.MSG_ID] if BaseHandler.MSG_ID in msg else None
         
         if ttl is None or type(ttl) is not int:
             self.logger.warning(BaseHandler.log_invalid_ttl)
@@ -53,6 +55,10 @@ class BaseHandler():
         
         if flood is None or type(flood) is not bool:
             self.logger.warning(BaseHandler.log_invalid_flood)
+            return False
+            
+        if msg_id is None or self.parse_uuid(msg_id):
+            self.logger.warning(BaseHandler.log_invalid_msg_id)
             return False
         
         if data is None or type(data) is not dict:

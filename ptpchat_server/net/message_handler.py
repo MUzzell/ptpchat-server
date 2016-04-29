@@ -8,16 +8,6 @@ import ptpchat_server.handlers as handlers
 from ptpchat_server.handlers.base_handler import BaseHandler
 from ptpchat_server.base.node import Node
 
-'''
-Have you include the verb handler in handlers.__init__.py?
-'''
-__handler_classes__ = {
-    "HELLO" : handlers.HelloHandler,
-    "ROUTING" : handlers.RoutingHandler,
-    #temporary additions for testing
-    "CHANNEL" : BaseHandler,
-    "MESSAGE" : BaseHandler
-}
 
 class MessageHandler():
 
@@ -28,6 +18,18 @@ class MessageHandler():
     
     MSG_TYPE = "msg_type"
     MSG_DATA = "msg_data"
+    
+    '''
+    Have you include the verb handler in handlers.__init__.py?
+    '''
+    handler_classes = {
+        "HELLO" : handlers.HelloHandler,
+        "ROUTING" : handlers.RoutingHandler,
+        #temporary additions for testing
+        "CHANNEL" : BaseHandler,
+        "MESSAGE" : BaseHandler
+    }
+
 
     def __init__(self, logger, node_manager):
         self.logger = logger
@@ -47,7 +49,7 @@ class MessageHandler():
             self.logger.info(MessageHandler.log_invalid_json)
             return
             
-        if type(msg) is not dict:
+        if type(msg) is not dict:    
             self.logger.info(MessageHandler.log_invalid_msg % "not dictionary")
             return
 
@@ -56,9 +58,7 @@ class MessageHandler():
         
         verb = msg[MessageHandler.MSG_TYPE].upper()
          
-        global __handler_classes__
-        
-        if verb not in __handler_classes__:
+        if verb not in MessageHandler.handler_classes:
             self.logger.warning(MessageHandler.log_invalid_verb)
             return 
             
@@ -72,20 +72,20 @@ class MessageHandler():
 
     def broadcast_hello(self, factory):
     
-        global __handler_classes__
+        
         nodes = self.node_manager.get_nodes(None)
         self.logger.debug("Sending HELLO to %d nodes" % len(nodes))
         
-        handler = __handler_classes__['HELLO'](self.logger, self.node_manager)
+        handler = MessageHandler.handler_classes['HELLO'](self.logger, self.node_manager)
         for node in nodes:
             factory.send_message(handler.buildMessage(node), node)
         
     def broadcast_routing(self, factory):
     
-        global __handler_classes__
+        
         nodes = self.node_manager.get_nodes(None)
         self.logger.debug("Sending ROUTING to %d nodes" % len(nodes))
         
-        handler = __handler_classes__['ROUTING'](self.logger, self.node_manager)
+        handler = MessageHandler.handler_classes['ROUTING'](self.logger, self.node_manager)
         for node in nodes:
             factory.send_message(handler.buildMessage(node), node)
