@@ -70,22 +70,11 @@ class MessageHandler():
             
         return
 
-    def broadcast_hello(self, factory):
-    
-        
-        nodes = self.node_manager.get_nodes(None)
-        self.logger.debug("Sending HELLO to %d nodes" % len(nodes))
-        
+    def buildHello(self):
         handler = MessageHandler.handler_classes['HELLO'](self.logger, self.node_manager)
-        for node in nodes:
-            factory.send_message(handler.buildMessage(node), node)
+        return handler.buildMessage(None)
         
-    def broadcast_routing(self, factory):
-    
         
-        nodes = self.node_manager.get_nodes(None)
-        self.logger.debug("Sending ROUTING to %d nodes" % len(nodes))
-        
+    def buildRouting(self):
         handler = MessageHandler.handler_classes['ROUTING'](self.logger, self.node_manager)
-        for node in nodes:
-            factory.send_message(handler.buildMessage(node), node)
+        return handler.buildMessage(None)

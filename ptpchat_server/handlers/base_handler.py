@@ -1,5 +1,5 @@
 
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from ptpchat_server.base.node import Node
 
@@ -129,6 +129,7 @@ class BaseHandler():
         if flood is None:
             flood = self.flood
         return json.dumps({
+            BaseHandler.MSG_ID : "%s" % uuid4(),
             BaseHandler.TTL : ttl,
             BaseHandler.FLOOD : flood,
             BaseHandler.SENDER_ID : self.node_manager.local_node.node_id,

@@ -137,7 +137,7 @@ class NodeManager():
             return_node = node if filter[Node.BASE_ID] == node.base_id else None
         if Node.TTL in filter:
             return_node = node if filter[Node.TTL] == node.ttl else None
-        if Node.SEEN_THROUGH if filter:
+        if Node.SEEN_THROUGH in filter:
             return_node = node if filter[Node.SEEN_THROUGH] == node.seen_through else None
         if 'excluding_base_id' in filter:
             return_node = node if filter[Node.BASE_ID] != node.base_id else None

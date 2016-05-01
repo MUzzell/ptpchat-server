@@ -47,6 +47,7 @@ class MessageFactory(Factory):
     def connectionAdded(self, client):
         self.logger.info(MessageFactory.log_connection_added % (client.addr.host, client.addr.port))
         self.clients.append(client)
+        self.sendHello(client)
         
     def connectionRemoved(self, client):
         self.logger.info(MessageFactory.log_connection_removed % (client.addr.host, client.addr.port))
@@ -55,10 +56,10 @@ class MessageFactory(Factory):
             client.node.isConnected = False
             self.node_manager.update_node(client.node)
         
-    def broadcast(self):
-        self.node_manager.update_nodes()
-        self.message_handler.broadcast_hello(self)
-        self.message_handler.broadcast_routing(self)
+    def sendHello(self, client):
+        self.logger.debug("Sending HELLO to new connection: %s:%d" % (client.addr.host, client.addr.port))
+        client.sendString(self.message_handler.buildHello())
+        client.sendString(self.message_handler.buildRouting())
         
     def send_message(self, data, target_node):
         node = self.node_manager.get_node_for_target(target_node)
@@ -70,6 +71,7 @@ class MessageFactory(Factory):
         clients = [x for x in self.clients if x.node == node]
         
         if clients is None or len(clients) == 0:
+            self.logger.error(MessageFactory.log_cannot_reach_node % target_node)
             return
             
         clients[0].sendString(data)
@@ -101,7 +103,7 @@ class CommunicationServer():
         
         reactor.listenTCP(config.main.listen_port, self.factory)
 
-        self.broadcast_loop = task.LoopingCall(self.broadcast)
+        #self.broadcast_loop = task.LoopingCall(self.broadcast)
         
     def broadcast(self):
         self.factory.broadcast()
@@ -109,7 +111,7 @@ class CommunicationServer():
     def serve_forever(self):
         self.logger.info("CommunicationServer starting up")
         self.logger.debug("Listening on: %s:%d" % self.server_address)
-        self.broadcast_loop.start(self.broadcast_loop_interval, now=False)
+        #self.broadcast_loop.start(self.broadcast_loop_interval, now=False)
         self.observer.start()
         reactor.run()
         

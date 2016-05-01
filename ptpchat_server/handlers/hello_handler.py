@@ -59,7 +59,7 @@ class HelloHandler(BaseHandler):
         client.set_node(node)
         
         self.logger.debug("Sending response HELLO to node %s" % node.node_id);
-        client.sendString(self.buildMessage(None))
+        
             
         return True
             
@@ -67,7 +67,7 @@ class HelloHandler(BaseHandler):
         
         return self.compile_message({ 
             HelloHandler.VERSION : self.node_manager.local_node.version,
-            HelloHandler.ATTRIBUTES : self.node_manager.local_node.attributes}, target_id, ttl, flood)
+            HelloHandler.ATTRIBUTES : self.node_manager.local_node.attributes}, target_id, 1, False)
             
 
         
