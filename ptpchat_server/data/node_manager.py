@@ -39,23 +39,26 @@ class NodeManager():
         * Sent us a ROUTING message to the node (with the lowest TTL)
     '''
     def get_node_for_target(self, target_node):
-        
-        nodes = self.get_nodes({Node.TTL : 1})
-        
-        if nodes is None or len(nodes) == 0:
-            return None
-            
-        if target_node in nodes:
+    
+        if target_node.seen_through is None:
             return target_node
-            
-        connecting_nodes = [(n, n.connections[target_node.base_id]) for n in nodes if node.connects_to(target_node)]
         
-        if len(nodes) == 0:
-            return None
-           
-        sorted(connecting_nodes, key=lambda x: x[1])
+        #nodes = self.get_nodes({Node.TTL : 1})
+        
+        #if nodes is None or len(nodes) == 0:
+        #    return None
             
-        return connecting_nodes[0][0]
+        #if target_node in nodes:
+        #    return target_node
+            
+        #connecting_nodes = [(n, n.connections[target_node.base_id]) for n in nodes if node.connects_to(target_node)]
+        
+        nodes = self.get_nodes({Node.BASE_ID : target_node.seen_through})
+        
+        if len(nodes) != 0:
+            return nodes[0]
+           
+        return None
     
     def add_node(self, node_data):
           
@@ -134,6 +137,8 @@ class NodeManager():
             return_node = node if filter[Node.BASE_ID] == node.base_id else None
         if Node.TTL in filter:
             return_node = node if filter[Node.TTL] == node.ttl else None
+        if Node.SEEN_THROUGH if filter:
+            return_node = node if filter[Node.SEEN_THROUGH] == node.seen_through else None
         if 'excluding_base_id' in filter:
             return_node = node if filter[Node.BASE_ID] != node.base_id else None
         if 'last_seen_lt' in filter:

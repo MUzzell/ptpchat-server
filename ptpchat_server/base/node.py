@@ -11,6 +11,7 @@ class Node():
     
     CLIENT_ADDR = 'client_client'
     LAST_SEEN = 'last_seen'
+    SEEN_THROUGH = 'seen_through'
     
     TTL = 'ttl'
     
@@ -51,6 +52,7 @@ class Node():
         self.version = node_data[Node.VERSION] if Node.VERSION in node_data else None
         self.last_seen = node_data[Node.LAST_SEEN] if Node.LAST_SEEN in node_data else None
         self.ttl = node_data[Node.TTL] if Node.TTL in node_data else 32 #default TTL
+        self.seen_through = node_data[Node.SEEN_THROUGH] if Node.SEEN_THROUGH in node_data else None
         
         attrs = node_data[Node.ATTRIBUTES] if Node.ATTRIBUTES in node_data else None
         
@@ -70,3 +72,6 @@ class Node():
         if type(other) is not Node:
             return False
         return self.base_id == other.base_id
+        
+    def __str__(self):
+        return self.node_id

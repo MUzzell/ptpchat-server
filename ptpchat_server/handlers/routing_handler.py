@@ -32,10 +32,12 @@ class RoutingHandler(BaseHandler):
         nodes = self.node_manager.get_nodes({Node.NODE_ID : sender_id})
         
         if nodes is None or len(nodes) == 0:
-            self.logger.warning(RoutingHandler.log_unknown_node)
+            self.logger.warning(RoutingHandler.log_unknown_nodes)
             return False
         else:
             sender_node = nodes[0]
+            
+        connected_nodes = self.node_manager.get_nodes({Node.SEEN_THROUGH : sender_id})
             
         for node in data[RoutingHandler.NODES]:
             node_id = None
@@ -51,34 +53,35 @@ class RoutingHandler(BaseHandler):
                 continue
             
             if Node.TTL in node and type(node[Node.TTL]) is int:
-                ttl = node[Node.TTL]
+                ttl = node[Node.TTL] +1
             else:
                 self.logger.warning(RoutingHandler.log_invalid_nodes_entry)
                 continue
                 
             routing_node = None
             
-            if node_id[1] in sender_node.connections and sender_node.connections[node_id[1]] == ttl:
-                self.logger.debug("ROUTING ttl for node %s has not changed, ignoring" % node[Node.NODE_ID])
-                continue
+            #if node_id[1] in sender_node.connections and sender_node.connections[node_id[1]] == ttl:
+            #    self.logger.debug("ROUTING ttl for node %s has not changed, ignoring" % node[Node.NODE_ID])
+            #    continue
             
             nodes = self.node_manager.get_nodes({Node.BASE_ID : node_id[1]})
             
             if nodes is None or len(nodes) == 0:
-                routing_node = self.addRoutingNode(node_id, ttl+1)
-                sender_node.connections[routing_node.base_id] = ttl
+                routing_node = self.node_manager.add_node({
+                    Node.NODE_ID : node_id,
+                    Node.TTL : ttl,
+                    Node.SEEN_THROUGH : sender_node.base_id})
+                #sender_node.connections[routing_node.base_id] = ttl
             else:
                 routing_node = nodes[0]
                 sender_node.connections[routing_node.base_id] = ttl
                 if routing_node.ttl > ttl:
                     self.logger.info(RoutingHandler.log_updating_ttl % routing_node.base_id)
-                    routing_node.ttl = ttl+1
+                    routing_node.ttl = ttl
+                    routing_node.seen_through = sender_node.base_id
                     self.node_manager.update_node(routing_node)
             
-            self.node_manager.update_node(sender_node)
-             
-    def addRoutingNode(node_id, ttl):
-        pass
+            #self.node_manager.update_node(sender_node)
     
     def buildMessage(self, data, target_id = None, ttl=None, flood=None):
         

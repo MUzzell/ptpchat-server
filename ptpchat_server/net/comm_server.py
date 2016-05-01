@@ -33,6 +33,7 @@ class MessageFactory(Factory):
 
     log_connection_added = "Client connection added: %s:%d"
     log_connection_removed = "Client connection removed; %s:%d"
+    log_cannot_reach_node = "Unable to reach node: %s"
     
     def __init__(self, config, logger, node_manager, message_handler):
         self.logger = logger;
@@ -63,6 +64,7 @@ class MessageFactory(Factory):
         node = self.node_manager.get_node_for_target(target_node)
         
         if node is None:
+            self.logger.error(MessageFactory.log_cannot_reach_node % target_node)
             return
         
         clients = [x for x in self.clients if x.node == node]

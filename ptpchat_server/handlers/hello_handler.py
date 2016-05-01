@@ -52,6 +52,7 @@ class HelloHandler(BaseHandler):
             node = nodes[0]
             node.last_seen = time.time()
             node.ttl = 1
+            node.seen_through = None
             self.node_manager.update_node(node)
         
         self.logger.debug("Attributing client %s:%d to node %s" % (client.addr.host, client.addr.port, node.node_id))
