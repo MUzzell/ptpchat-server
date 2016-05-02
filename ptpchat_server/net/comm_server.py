@@ -59,7 +59,12 @@ class MessageFactory(Factory):
     def sendHello(self, client):
         self.logger.debug("Sending HELLO to new connection: %s:%d" % (client.addr.host, client.addr.port))
         client.sendString(self.message_handler.buildHello())
-        client.sendString(self.message_handler.buildRouting())
+        
+    def sendRouting(self):
+        msg = self.message_handler.buildRouting()
+        
+        for client in self.clients:
+            client.sendString(msg)
         
     def send_message(self, data, target_node):
         node = self.node_manager.get_node_for_target(target_node)

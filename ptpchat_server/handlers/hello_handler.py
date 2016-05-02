@@ -58,8 +58,8 @@ class HelloHandler(BaseHandler):
         self.logger.debug("Attributing client %s:%d to node %s" % (client.addr.host, client.addr.port, node.node_id))
         client.set_node(node)
         
-        self.logger.debug("Sending response HELLO to node %s" % node.node_id);
-        
+        self.logger.debug("Sending ROUTING to connected nodes");
+        factory.sendRouting()
             
         return True
             
