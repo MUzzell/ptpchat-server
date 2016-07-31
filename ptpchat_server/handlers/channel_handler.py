@@ -4,6 +4,7 @@ import time
 
 import pdb
 
+
 class ChannelHandler(BaseHandler):
 
     log_no_node_id = "CHANNEL, no 'node_id' in data, ignoring"
@@ -15,14 +16,13 @@ class ChannelHandler(BaseHandler):
     log_adding_node = "CHANNEL, adding node: %s"
     log_updating_node = "CHANNEL, updating node: %s"
     
-    def __init__(self, uuid, logger= None, node_manager= None, extras = None):
+    def __init__(self, uuid, logger=None, node_manager=None, extras=None):
         BaseHandler.__init__(self, uuid, logger, node_manager)
         self.verb = 'CHANNEL'
         self.ttl = 32
         self.flood = True
-        
-    
-    def handleVerb(self, data, addr, sock):
+
+    def handle_verb(self, data, addr, sock):
         
         if BaseHandler.NODE_ID not in data:
             self.logger.warning(ChannelHandler.log_no_node_id)
@@ -48,12 +48,18 @@ class ChannelHandler(BaseHandler):
             self.logger.warning(ChannelHandler.log_node_id_same_as_server)
             return False
             
-        #This server simply relays channel messages, so just add this node if necessary
+        # This server simply relays channel messages, so just add this node if necessary
         node = self.node_manager.get_nodes({BaseHandler.NODE_ID: node_id})
     
-        if node is None or len(node) == 0 :
+        if node is None or len(node) == 0:
             self.logger.info(ChannelHandler.log_adding_node % node_id)
-            self.node_manager.add_node({BaseHandler.NODE_ID : node_id, BaseHandler.CLIENT_ADDR : addr, BaseHandler.LAST_SEEN : time.time() })
+            self.node_manager.add_node(
+                {
+                    BaseHandler.NODE_ID: node_id,
+                    BaseHandler.CLIENT_ADDR: addr,
+                    BaseHandler.LAST_SEEN: time.time()
+                }
+            )
         else:
             self.logger.info(ChannelHandler.log_updating_node % node_id)
             node = node[0]
@@ -62,11 +68,9 @@ class ChannelHandler(BaseHandler):
             
         return True;
             
-    def buildMessage(self, data, ttl=None, flood=None):
+    def build_message(self, data, ttl=None, flood=None):
         
         return self.compile_message({ 
-            BaseHandler.NODE_ID : "%s" % self.server_uuid,
-            ChannelHandler.VERSION : self.version }, ttl, flood)
-            
+            BaseHandler.NODE_ID: "%s" % self.server_uuid,
+            ChannelHandler.VERSION: self.version}, ttl, flood)
 
-        

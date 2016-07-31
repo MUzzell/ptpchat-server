@@ -30,21 +30,21 @@ logger_name = "ptpchat-server"
 def setup(args, config):
     global comms
     addr = (config.main.listen_host, config.main.listen_port)
-    
+
     logger = LogManager(
         logger_name,
         file_name = config.main.log_file if args.log_to_file else None,
         log_level=config.main.log_level if args.log_level is None else args.log_level)
-    
+
     node_manager = NodeManager(config, logger)
-    
+
     message_handler = MessageHandler(logger, node_manager)
-    
+
     comms = CommunicationServer(config, logger, node_manager, message_handler)
-        
+
     #listener.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    
-    
+
+
     if args.start:
         comms.serve_forever()
 
@@ -54,7 +54,7 @@ def process_args(args):
     parser.add_argument('--no-log', dest='log_to_file', action='store_false', help="disable file logging")
     parser.add_argument('--no-start', dest='start', action='store_false', default=True, help="just setup and close")
     return parser.parse_args(args)
-    
+
 if __name__ == '__main__':
 
     args = process_args(sys.argv[1:])

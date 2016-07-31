@@ -1,80 +1,82 @@
 '''
 message_handler.py
-used by ListenerServer 
+used by ListenerServer
 '''
-import json, socket, pdb
+
+import json
+import socket
+import pdb
+import logging
 
 import ptpchat_server.handlers as handlers
 from ptpchat_server.handlers.base_handler import BaseHandler
 from ptpchat_server.base.node import Node
 
+logger = logging.getLogger(__name__)
 
-class MessageHandler():
+class MessageHandler:
 
     log_invalid_json = "ValueError, invalid json received"
     log_invalid_msg = "Invalid msg received, %s"
     log_invalid_verb = "Invalid verb received"
     log_msg_rejected = "%s message rejected"
-    
+
     MSG_TYPE = "msg_type"
     MSG_DATA = "msg_data"
-    
+
     '''
     Have you include the verb handler in handlers.__init__.py?
     '''
     handler_classes = {
-        "HELLO" : handlers.HelloHandler,
-        "ROUTING" : handlers.RoutingHandler,
-        #temporary additions for testing
-        "CHANNEL" : BaseHandler,
-        "MESSAGE" : BaseHandler
+        "HELLO": handlers.HelloHandler,
+        "ROUTING": handlers.RoutingHandler,
+        # temporary additions for testing
+        "CHANNEL": BaseHandler,
+        "MESSAGE": BaseHandler
     }
 
-
-    def __init__(self, logger, node_manager):
-        self.logger = logger
+    def __init__(self, node_manager):
         self.node_manager = node_manager
 
     def handle(self, string, client, factory):
         try:
             self.handle_request(string, client, factory)
         except Exception as e:
-            self.logger.error("Unhandled error in request: %s" % e.message)
-    
+            logger.error("Unhandled error in request: %s" % e.message)
+
     def handle_request(self, data, client, factory):
-        self.logger.debug("Message handler, received message")
+        logger.debug("Message handler, received message")
         try:
             msg = json.loads(data)
         except ValueError:
-            self.logger.info(MessageHandler.log_invalid_json)
+            logger.info(MessageHandler.log_invalid_json)
             return
-            
-        if type(msg) is not dict:    
-            self.logger.info(MessageHandler.log_invalid_msg % "not dictionary")
+
+        if type(msg) is not dict:
+            logger.info(MessageHandler.log_invalid_msg % "not dictionary")
             return
 
         if MessageHandler.MSG_TYPE not in msg or msg[MessageHandler.MSG_TYPE] is None:
-            self.logger.info(MessageHandler.log_invalid_msg % "msg_type invalid")
-        
+            logger.info(MessageHandler.log_invalid_msg % "msg_type invalid")
+
         verb = msg[MessageHandler.MSG_TYPE].upper()
-         
+
         if verb not in MessageHandler.handler_classes:
-            self.logger.warning(MessageHandler.log_invalid_verb)
-            return 
-            
-        self.logger.debug("%s message received from %s:%d" % (verb, client.addr.host, client.addr.port))
-        
-        handler = MessageHandler.handler_classes[verb](self.logger, self.node_manager)
+            logger.warning(MessageHandler.log_invalid_verb)
+            return
+
+        logger.debug("%s message received from %s:%d" % (verb, client.addr.host, client.addr.port))
+
+        handler = MessageHandler.handler_classes[verb](logger, self.node_manager)
         if not handler.handleMessage(msg, client, factory):
-            self.logger.info(MessageHandler.log_msg_rejected % verb)
-            
+            logger.info(MessageHandler.log_msg_rejected % verb)
+
         return
 
-    def buildHello(self):
-        handler = MessageHandler.handler_classes['HELLO'](self.logger, self.node_manager)
+    def build_hello(self):
+        handler = MessageHandler.handler_classes['HELLO'](logger, self.node_manager)
         return handler.buildMessage(None)
-        
-        
-    def buildRouting(self):
-        handler = MessageHandler.handler_classes['ROUTING'](self.logger, self.node_manager)
+
+    def build_routing(self):
+        handler = MessageHandler.handler_classes['ROUTING'](logger, self.node_manager)
         return handler.buildMessage(None)
