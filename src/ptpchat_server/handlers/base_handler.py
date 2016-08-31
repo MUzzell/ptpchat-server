@@ -3,7 +3,7 @@ import json
 from uuid import UUID, uuid4
 
 from ptpchat_server.base.node import Node
-
+from . import exceptions
 
 class BaseHandler:
 
@@ -40,47 +40,35 @@ class BaseHandler:
         data = msg[BaseHandler.MSG_DATA] if BaseHandler.MSG_DATA in msg else None
 
         if data is None or type(data) is not dict:
-            self.logger.warning(BaseHandler.log_invalid_msg % "msg_data invalid")
-            return False
+            raise exceptions.InvalidMessage("msg_data")
 
         ttl = msg[BaseHandler.TTL] if BaseHandler.TTL in msg else None
         flood = msg[BaseHandler.FLOOD] if BaseHandler.FLOOD in msg else None
         msg_id = msg[BaseHandler.MSG_ID] if BaseHandler.MSG_ID in msg else None
 
         if ttl is None or type(ttl) is not int:
-            self.logger.warning(BaseHandler.log_invalid_ttl)
-            return False
+            raise exceptions.InvalidMessage("ttl")
 
         if ttl <= 0:
-            self.logger.warning(BaseHandler.log_ttl_exceeded)
-            return False
+            raise exceptions.TtlExceeded(None, None) # Do nothing
 
         if flood is None or type(flood) is not bool:
-            self.logger.warning(BaseHandler.log_invalid_flood)
-            return False
+            raise exceptions.InvalidMessage("flood")
 
         if msg_id is None or self.parse_uuid(msg_id) is None:
-            self.logger.warning(BaseHandler.log_invalid_msg_id)
-            return False
-
-        if data is None or type(data) is not dict:
-            self.logger.warning(BaseHandler.log_invalid_data)
-            return False
+            raise exceptions.InvalidMessagE("msg_id")
 
         sender_id = msg[BaseHandler.SENDER_ID] if BaseHandler.SENDER_ID in msg else None
         target_id = msg[BaseHandler.TARGET_ID] if BaseHandler.TARGET_ID in msg else None
 
         if sender_id is None or not Node.is_valid_node_id(sender_id):
-            self.logger.warning(BaseHandler.log_invalid_node_id)
-            return False
+            raise exceptions.InvalidMessage("sender_id")
 
         if sender_id == self.node_manager.local_node.node_id:
-            self.logger.warning(BaseHandler.log_invalid_sender_id)
-            return False
+            raise excpetions.InvalidMessage("sender_id")
 
         if target_id is not None and not Node.is_valid_node_id(target_id):
-            self.logger.warning(BaseHandler.log_invalid_node_id)
-            return False
+            raise exceptions.InvalidMessage("target_id")
 
         if target_id is None and not flood and ttl == 1:  # for this node
             return self.handle_verb(sender_id, data, client, factory)
@@ -92,7 +80,7 @@ class BaseHandler:
 
         if ttl <= 0:
             # TODO: send NACK
-            return False
+            raise exceptions.TtlExceeded(sender_id, msg_id)
 
         msg[BaseHandler.TTL] = ttl
         new_msg = json.dumps(msg)
@@ -102,8 +90,6 @@ class BaseHandler:
             factory.send_messages(new_msg, [x[BaseHandler.NODE_ID] for x in nodes])
         elif target_id is not None:
             factory.send_message(new_msg, target_id)
-
-        return True
 
     def handle_verb(self, data, client, factory):
         self.logger.error("BaseHandler.handleVerb called!")

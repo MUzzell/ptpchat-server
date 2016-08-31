@@ -1,6 +1,7 @@
 
 from ptpchat_server.base.node import Node
 from base_handler import BaseHandler
+from . import exceptions
 import time
 
 import pdb
@@ -26,14 +27,13 @@ class RoutingHandler(BaseHandler):
         sender_node = None
 
         if RoutingHandler.NODES not in data or type(data[RoutingHandler.NODES]) is not list:
-            self.logger.warning(RoutingHandler.log_invalid_nodes)
-            return False
+            raise exceptions.InvalidMessage("nodes")
 
         nodes = self.node_manager.get_nodes({Node.NODE_ID : sender_id})
 
         if nodes is None or len(nodes) == 0:
             self.logger.warning(RoutingHandler.log_unknown_nodes)
-            return False
+            return
         else:
             sender_node = nodes[0]
 

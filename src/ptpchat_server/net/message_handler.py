@@ -11,6 +11,7 @@ import logging
 import ptpchat_server.handlers as handlers
 from ptpchat_server.handlers.base_handler import BaseHandler
 from ptpchat_server.base.node import Node
+from ptpchat_server.handlers import exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -44,22 +45,29 @@ class MessageHandler:
         except Exception as e:
             logger.error("Unhandled error in request: %s" % e.message)
 
-    def handle_request(self, data, client, factory):
-        logger.debug("Message handler, received message")
-        try:
-            msg = json.loads(data)
-        except ValueError:
-            logger.info(MessageHandler.log_invalid_json)
-            return
+    def check_message(self, data):
+        msg = json.loads(data)
 
         if type(msg) is not dict:
             logger.info(MessageHandler.log_invalid_msg % "not dictionary")
             return
 
         if MessageHandler.MSG_TYPE not in msg or msg[MessageHandler.MSG_TYPE] is None:
-            logger.info(MessageHandler.log_invalid_msg % "msg_type invalid")
+            raise exceptions.InvalidMessage("msg_type")
 
-        verb = msg[MessageHandler.MSG_TYPE].upper()
+        return msg, msg[MessageHandler.MSG_TYPE].upper()
+
+    def handle_request(self, data, client, factory):
+        logger.debug("Message handler, received message")
+
+        try:
+            msg, verb = check_message(data)
+        except ValueError:
+            logger.warning("Received invalid json")
+            return
+        except exceptions.InvalidMessage:
+            logger.warning("Invalid message received")
+            return
 
         if verb not in MessageHandler.handler_classes:
             logger.warning(MessageHandler.log_invalid_verb)
@@ -68,8 +76,16 @@ class MessageHandler:
         logger.debug("%s message received from %s:%d" % (verb, client.addr.host, client.addr.port))
 
         handler = MessageHandler.handler_classes[verb](logger, self.node_manager)
-        if not handler.handleMessage(msg, client, factory):
-            logger.info(MessageHandler.log_msg_rejected % verb)
+        try:
+            if not handler.handleMessage(msg, client, factory):
+                logger.info(MessageHandler.log_msg_rejected % verb)
+        except exceptions.InvalidMessage as im:
+            logger.warning("Invalid message received for verb {0}: {1}".format(
+                verb, im.message))
+        except exceptions.TtlExceeded as te:
+            logger.warning(te.message)
+        except:
+            logger.exception("Unhandled exception processing {0} message".format(verb))
 
         return
 

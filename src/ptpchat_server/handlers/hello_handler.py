@@ -1,5 +1,6 @@
 
 from ptpchat_server.base.node import Node
+from . import exceptions
 from base_handler import BaseHandler
 import time
 
@@ -24,16 +25,13 @@ class HelloHandler(BaseHandler):
     def handleVerb(self, sender_id, data, client, factory):
 
         if sender_id is None:
-            self.logger.warning(HelloHandler.log_invalid_sender_id)
-            return False
+            raise exceptions.InvalidMessage("sender_id")
 
         if sender_id == self.node_manager.local_node.node_id:
-            self.logger.warning(HelloHandler.log_invalid_sender_id)
-            return False
+            raise exceptions.InvalidMessage("sender_id")
 
         if Node.ATTRIBUTES in data and type(data[Node.ATTRIBUTES]) is not dict:
-            self.logger.warning(HelloHandler.log_invalid_attriubtes)
-            return False
+            raise exceptions.InvalidMessage("attributes")
 
         nodes = self.node_manager.get_nodes({Node.NODE_ID: sender_id})
 
@@ -61,7 +59,6 @@ class HelloHandler(BaseHandler):
         self.logger.debug("Sending ROUTING to connected nodes");
         factory.sendRouting()
 
-        return True
 
     def buildMessage(self, data, target_id = None, ttl=None, flood=None):
 

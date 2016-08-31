@@ -36,11 +36,14 @@ class Node:
             raise AttributeError("NodeManager, Invalid NodeId")
         return match.groups()
 
+    @property
+    def node_id(self):
+        return '{0}@{1}'.format(self.name, self.base_id)
+
     def __init__(self, node_id, **kwargs):
         if not Node.is_valid_node_id(node_id):
             raise AttributeError("Node, Invalid NodeId")
 
-        self.node_id = node_id
         node_id_parts = Node.parse_node_id(node_id)
         self.name = node_id_parts[0]
         self.base_id = node_id_parts[1]
