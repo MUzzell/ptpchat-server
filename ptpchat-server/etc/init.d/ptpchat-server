@@ -1,0 +1,48 @@
+set -e
+
+. /lib/lsb/init-functions
+
+NAME="ptpchat-server"
+DESC="ptpchat-server"
+
+BIN_DIR="/usr/lib/ptpchat-server"
+PIDFILE="/var/run/ptpchat-server/$NAME.pid"
+DAEMON=`which twistd`
+DAEMON_OPTS="-y $BIN_DIR/ptpchat-server.tac --pidfile=$PIDFILE"
+DAEMON_USER="nobody"
+
+test -x "$DAEMON" || exit 0
+
+if [ -f "$PIDFILE" ] && ( ! [ -s "$PIDFILE" ] || ! kill -0 "$( cat $PIDFILE)" 1> /dev/null 2>$1 ); then
+    rm "$PIDFILE"
+fi
+
+case "$1" in
+    start)
+        echo -n "Starting $DESC: "
+        start-stop-daemon --start --pidfile "$PIDFILE" --chdir "$BIN_DIR" --chuid $DAEMON_USER --exec $DAEMON -- $DAEMON_OPTS || true
+        echo "$NAME."
+        ;;
+    stop)
+        echo -n "Stopping $DESC: "
+        start-stop-daemon --stop --retry=TERM/60/KILL/5 --pidfile "$PIDFILE" || true
+        echo "$NAME."
+        ;;
+    restart|force-reload)
+        echo -n "Restarting $DESC: "
+        start-stop-daemon --stop --retry=TERM/60/KILL/5 --pidfile "$PIDFILE" || true
+        sleep 1
+        start-stop-daemon --start --pidfile "$PIDFILE" --chdir "$BIN_DIR" --chuid $DAEMON_USER --exec $DAEMON -- $DAEMON_OPTS || true
+        echo "$NAME."
+        ;;
+    status)
+        status_of_proc -p "$PIDFILE" "$DAEMON" $NAME && exit 0 || exit $?
+        ;;
+    *)
+        N=/etc/init.d/$NAME
+        echo "Usage: $N (start|stop|restart|status)" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

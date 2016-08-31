@@ -1,0 +1,10 @@
+#!/bin/bash
+cd ..
+GIT_DIR='.git'
+
+if [ `status ptpchat-server | grep start | wc -l` -eq 1 ]
+then
+    stop ptpchat-server
+fi
+
+umask 002 && git reset --hard
