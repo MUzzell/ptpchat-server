@@ -6,6 +6,7 @@ import operator
 import logging
 
 from ptpchat_server.base.node import Node
+from ptpchat_server.util.read_monitor import ReadMonitor
 
 logger = logging.getLogger(__name__)
 
@@ -152,35 +153,3 @@ class NodeManager:
         if 'last_seen_gt' in args:
             return_node = node if args['last_seen_gt'] < node.last_seen else None
         return return_node is not None
-
-
-class ReadMonitor:
-
-    def __init__(self):
-        self.count = 0
-
-        self.write_cond = threading.Condition()
-
-    def start_read(self):
-        self.write_cond.acquire()
-        self.count += 1
-        self.write_cond.release()
-
-    def end_read(self):
-        self.write_cond.acquire()
-        self.count -= 1
-        if self.count == 0:
-            self.write_cond.notify()
-        self.write_cond.release()
-
-    def start_write(self):
-
-        self.write_cond.acquire()
-        while not self.count == 0:
-            self.write_cond.wait(0.5)
-
-    def end_write(self):
-        self.write_cond.notify()
-        self.write_cond.release()
-
-
