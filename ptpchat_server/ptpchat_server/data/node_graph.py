@@ -59,20 +59,26 @@ class NodeGraph:
         with self.monitor.write():
             self.nodes[node.base_id] = node
 
-        return None
+        return node
 
     def update_node_links(self, node, connections):
 
         if node is None or not isinstance(node, Node):
             raise AttributeError("invalid node")
 
-        with self.monitor.read():
+        with self.monitor.write():
             if node.base_id not in self.nodes:
                 raise AttributeError("node not found")
 
-        with self.monitor.write():
-            self.graph[node.base_id] = list(set(
-                self.graph[node.base_id] + connections))
+            self.graph[node.base_id] = _build_node_links(
+                self.graph[node.base_id], connections)
+
+    def _build_node_links(self, current, new):
+
+        def get_key(item):
+            return item[0]
+
+        return list(set(current + new))
 
     def drop_node(self, node):
 

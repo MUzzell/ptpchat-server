@@ -26,10 +26,6 @@ class MessageReceiver(Int32StringReceiver):
     def connectionLost(self, reason):
         self.factory.connectionRemoved(self)
 
-    def set_node(self, node):
-        self.node = node
-        #self.factory.attachNode(self,node);
-
     def stringReceived(self, string):
         if len(string) > 0:
             self.message_handler.handle(string, self, self.factory)
@@ -68,6 +64,17 @@ class MessageFactory(Factory):
         node.seen_through = connecting_nodes_ttl[0][0]
 
         self.node_manager.update_node(client.node)
+
+    def set_node(self, client, node):
+
+        current_clients = [x for x in self.clients if x.node == node]
+
+        if len(current_clients) > 0:
+            for current_client in current_clients:
+                logger.info("Dropping node {0} from client {1}".format(node.node_id, current_client.addr))
+                client.node == None
+        logger.info("Attaching node {0} to client {1}".format(node.node_id, client.addr))
+        client.node = node
 
     def send_hello(self, client):
         logger.debug("Sending HELLO to new connection: %s:%d" % (client.addr.host, client.addr.port))

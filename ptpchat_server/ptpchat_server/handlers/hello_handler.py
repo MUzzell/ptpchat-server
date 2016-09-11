@@ -45,6 +45,10 @@ class HelloHandler(BaseHandler):
                 Node.LAST_SEEN : time.time(),
                 Node.ATTRIBUTES : data[Node.ATTRIBUTES] if Node.ATTRIBUTES in data else None,
                 Node.VERSION : data[Node.VERSION] if Node.VERSION in data else None})
+            self.node_manager.update_node_links(
+                self.node_manager.local_node, [(node.base_id, 1)])
+            self.node_manager.update_node_links(
+                node, [(self.node_manager.local_node, 1)])
         else:
             self.logger.info(HelloHandler.log_updating_node % sender_id)
             node = nodes[0]
@@ -54,7 +58,7 @@ class HelloHandler(BaseHandler):
             self.node_manager.update_node(node)
 
         self.logger.debug("Attributing client %s:%d to node %s" % (client.addr.host, client.addr.port, node.node_id))
-        client.set_node(node)
+        factory.set_client_node(client, node)
 
         self.logger.debug("Sending ROUTING to connected nodes");
         factory.sendRouting()

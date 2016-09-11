@@ -30,7 +30,6 @@ class ReadMonitor:
         self.write_cond.release()
 
     def write(self):
-
         return WriteMonitor(self)
 
     def read(self):

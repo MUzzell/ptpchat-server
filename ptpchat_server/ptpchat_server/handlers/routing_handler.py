@@ -32,8 +32,7 @@ class RoutingHandler(BaseHandler):
         nodes = self.node_manager.get_nodes({Node.NODE_ID : sender_id})
 
         if nodes is None or len(nodes) == 0:
-            self.logger.warning(RoutingHandler.log_unknown_nodes)
-            return
+            raise AttributeError("node not found")
         else:
             sender_node = nodes[0]
 
