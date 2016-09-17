@@ -1,6 +1,6 @@
 import threading
 
-class ReadMonitor:
+class NodeMonitor:
 
     def __init__(self):
         self.count = 0
@@ -42,7 +42,7 @@ class WriteMonitor:
     def __enter__(self):
         self.monitor.start_write()
 
-    def __exit__(self):
+    def __exit__(self, type, value, traceback):
         self.monitor.end_write()
 
 class ReadMonitor:
@@ -52,7 +52,7 @@ class ReadMonitor:
     def __enter__(self):
         self.monitor.start_read()
 
-    def __exit__(self):
+    def __exit__(self, type, value, traceback):
         self.monitor.end_read()
 
 def read(monitor):

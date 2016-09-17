@@ -5,11 +5,13 @@ import operator
 import logging
 
 from ptpchat_server.base.node import Node
-from ptpchat_server.util.read_monitor import ReadMonitor
+from ptpchat_server.util.read_monitor import NodeMonitor
 
-logger = logging.getName(__name__)
+logger = logging.getLogger(__name__)
 
 class NodeGraph:
+
+    log_add_node_already_exists = "Node already exists: %s"
 
     def __init__(self, config):
 
@@ -18,27 +20,29 @@ class NodeGraph:
 
         self.node_cutoff = config.communication.node_cutoff
 
-        self.monitor = ReadMonitor()
+        self.monitor = NodeMonitor()
 
         self.nodes = {}
         self.graph = {}
 
-        self.local_node = Node(config.main.server_id,
+        self.local_node = Node(node_id = config.main.server_id,
             version = config.main.version,
             attributes = {Node.NODE_TYPE: Node.NODE_TYPE_SERVER}
         )
 
         self.graph[self.local_node.base_id] = []
 
+
+
     def add_node(self, node_data):
 
-        if Node.NODE_ID not in node_data or not Node.is_valid_node_id(node_data[Node.NODE_ID]):
+        if node_data is None:
             raise AttributeError("invalid node_id")
 
-        node = Node(node_data[Node.NODE_ID], node_data)
+        node = Node(**node_data)
 
         if len(self.get_nodes(node_data)) > 0:
-            logger.info(NodeManager.log_add_node_already_exists % node_data[Node.NODE_ID])
+            logger.info(NodeGraph.log_add_node_already_exists % node_data[Node.NODE_ID])
             return node
 
         with self.monitor.write():
@@ -46,6 +50,19 @@ class NodeGraph:
             self.graph[node.base_id] = []
 
         return node
+
+    def get_nodes(self, node_data):
+
+        node_id = node_data.get(Node.NODE_ID, None)
+
+        if node_id is not None:
+            name, base_id = Node.parse_node_id(node_id)
+            with self.monitor.read():
+                return_node = self.nodes.get(base_id, None)
+                return return_node if return_node is not None else []
+        else:
+            raise NotImplementedError()
+
 
     def update_node(self, node):
 

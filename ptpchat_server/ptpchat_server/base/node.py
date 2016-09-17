@@ -40,21 +40,24 @@ class Node:
     def node_id(self):
         return '{0}@{1}'.format(self.name, self.base_id)
 
-    def __init__(self, node_id, **kwargs):
+    def __init__(self, **kwargs):
+
+        node_id = kwargs.get(Node.NODE_ID,None)
+
         if not Node.is_valid_node_id(node_id):
-            raise AttributeError("Node, Invalid NodeId")
+            raise AttributeError("Invalid NodeId")
 
         node_id_parts = Node.parse_node_id(node_id)
         self.name = node_id_parts[0]
         self.base_id = node_id_parts[1]
 
         self.connections = {}
-        self.version = getattr(kwargs, Node.VERSION, None)
-        self.last_seen = getattr(kwargs, Node.LAST_SEEN, None)
-        self.ttl = getattr(kwargs, Node.TTL, 32) # default TTL
-        self.seen_through = getattr(kwargs, Node.SEEN_THROUGH, None)
+        self.version = kwargs.get( Node.VERSION, None)
+        self.last_seen = kwargs.get( Node.LAST_SEEN, None)
+        self.ttl = kwargs.get( Node.TTL, 32) # default TTL
+        self.seen_through = kwargs.get( Node.SEEN_THROUGH, None)
 
-        attrs = getattr(kwargs, Node.ATTRIBUTES, None)
+        attrs = kwargs.get( Node.ATTRIBUTES, None)
 
         if attrs is None:
             return
