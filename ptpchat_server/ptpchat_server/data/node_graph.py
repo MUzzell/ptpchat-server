@@ -41,6 +41,11 @@ class NodeGraph:
 
         node = Node(**node_data)
 
+        node_id = node_data[Node.NODE_ID]
+
+        if Node.parse_node_id(node_id)[1] == self.local_node.base_id:
+            raise AttributeError("Given node id matches server id")
+
         if len(self.get_nodes(node_data)) > 0:
             logger.info(NodeGraph.log_add_node_already_exists % node_data[Node.NODE_ID])
             return node
@@ -59,7 +64,7 @@ class NodeGraph:
             name, base_id = Node.parse_node_id(node_id)
             with self.monitor.read():
                 return_node = self.nodes.get(base_id, None)
-                return return_node if return_node is not None else []
+                return [return_node] if return_node is not None else []
         else:
             raise NotImplementedError()
 

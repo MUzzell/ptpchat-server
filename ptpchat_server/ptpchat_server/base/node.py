@@ -1,7 +1,7 @@
 import re
 
 
-class Node:
+class Node(object):
 
     NODE_ID = 'node_id'
     BASE_ID = 'base_id'
